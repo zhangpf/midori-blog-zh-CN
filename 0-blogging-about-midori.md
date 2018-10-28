@@ -1,5 +1,5 @@
 ---
-title: Midori博客系列翻译之零——介绍
+title: Midori博客系列翻译（0）——介绍
 date: 2018-10-20 14:55:07
 tags: [操作系统, Midori, 翻译, 微软]
 categories: 中文
@@ -80,7 +80,7 @@ may help to recitify some of this.
 7. [15 Years of Concurrency](/2016/11/30/15-years-of-concurrency/) 
 -->
 
-1. 三类安全性的故事
+1. [三类安全性的故事](/2018/10/24/midori/1-a-tale-of-three-safeties/)
 2. 对象即安全能力
 3. 一切皆异步
 4. 安全的原生代码
