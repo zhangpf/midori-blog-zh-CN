@@ -327,6 +327,6 @@ https://en.wikipedia.org/wiki/Ambient_authority) and enabling the [
 principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege)
 everywhere, by default, in a big way.  See you next time. 
 -->
-在本系列的下一篇文章中，我们将看到这种基本的安全性是如何提供了在编程模型和类型系统中担任一等公民的[基于能力的安全模型（capability-based security model）](https://en.wikipedia.org/wiki/Capability-based_security)的，
+在本系列的下一篇文章中，我们将看到这种基本的安全性是如何提供了在编程模型和类型系统中担任一等公民的[基于权能的安全模型（capability-based security model）](https://en.wikipedia.org/wiki/Capability-based_security)的，
 以及“从构造”上消除[环境权限（ambient authority）](https://en.wikipedia.org/wiki/Ambient_authority)和默认在所有地方启用[最小权限原则](https://zh.wikipedia.org/wiki/%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E5%8E%9F%E5%88%99)。
 我们下次再见！
