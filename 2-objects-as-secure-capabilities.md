@@ -1,7 +1,7 @@
 ---
 title: Midori博客系列翻译（2）——对象即安全权能
 date: 2018-11-18 13:15:00
-tags: [操作系统, Midori, 翻译, 安全，权能]
+tags: [操作系统, Midori, 翻译, 安全, 权能]
 categories: 中文
 ---
 
