@@ -115,7 +115,7 @@ Eventually we switched over from static to instance methods:
 -->
     Promise<U> u = p.WhenResolved(
         (T t) => { ...T可用时... },
-        (Exception e) => {{ ...产生失败... }
+        (Exception e) => { ...产生失败... }
     ); 
 
 <!-- 
