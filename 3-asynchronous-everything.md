@@ -14,10 +14,16 @@ asynchronous: all file and network IO, all message passing, and any "synchroniza
 with other asynchronous work.  The resulting system was highly concurrent, responsive to user input, and scaled like the
 dickens.  But as you can imagine, it also came with some fascinating challenges. 
 -->
-Midori是由许多通过强类型的消息传递接口连接的超轻量级、细粒度的进程构建而成。
-通常看到的程序是单一的宏进程，并可能带有一些内部的线程，而在Midori中则表示“同步阻塞是不允许的。这意味着在字面上一切都是异步的，包括所有文件和网络IO，消息传递，以及任何“同步”的活动，如与其他异步任务进行会合等，并
-由此产生的系统高度并发，响应用户输入，以及灵活的扩展。
-但也正如你想象得那样，这也带来了一些具有吸引力的挑战。
+Midori是由许多超轻量级的细粒度进程构建而成，
+这些进程通过强类型的消息传递接口相互连接。
+我们通常见到的程序是单一的可能带有一些内部的线程的宏进程。
+而在Midori中，进程则由数十个小型进程所表示，
+从而实现自然，安全和大部分的自动并行。
+同时，在Midori中，同步阻塞是不允许的，
+这意味着包括所有文件和网络I/O，消息传递，
+以及诸如与其他异步任务进行会合任何的“同步”活动等，在字面上的一切都是异步的。
+这样的设计使得实现的系统可高度并发，能快速响应用户的输入，以及灵活的扩展。
+但也正如你想象的那样，这在设计上也带来了一些吸引人的挑战。
 
 <!-- 
 ## Asynchronous Programming Model 
@@ -27,7 +33,7 @@ Midori是由许多通过强类型的消息传递接口连接的超轻量级、�
 <!-- 
 The asynchronous programming model looked a lot like C#'s async/await on the surface. 
 -->
-从外表上看，异步编程模型很像C#的async/await。
+乍一眼看，异步编程模型很像C#的async/await。
 
 <!-- 
 That's not a coincidence.  I was the architect and lead developer on [.NET tasks](
@@ -38,17 +44,19 @@ approaches back to the shipping language, and had been using a variant of the as
 began looking into it.  We didn't bring all the Midori goodness to .NET, but some of it certainly showed up, mostly in
 the area of performance.  It still kills me that I can't go back in time and make .NET's task a struct. 
 -->
-这不是巧合，因为我也是[.NET tasks](https://en.wikipedia.org/wiki/Parallel_Extensions)的架构师和首席开发者。
- 作为Midori的并发架构师，即将发布.NET版本，我承认我有一点偏见。 
-即使我知道我们所拥有的东西不会像Midori一样工作，但我们依旧开始了数年的旅程。
-但是当我们去的时候，我们与C#团队密切合作，将Midori的一些方法带回到交付的语言中，并且在开始研究C#的过程中，使用了async/await模型的变体大约一年。
-我们没有将所有Midori的优点带到.NET，但其中一些确实出现了，主要是在性能方面。 它仍然让我感到痛苦，我无法及时回归并将.NET的任务变成结构。
+而这并不是巧合，因为我也是
+[.NET tasks](https://en.wikipedia.org/wiki/Parallel_Extensions)的架构师和开发主管。
+作为Midori的并发设计者，对于即将发布的.NET新版本，我必须承认我对异步编程模型略有偏爱。 
+因此，即使知道对于Midori，可能不会像预期的那样工作，但我们依旧开始了数年的实现过程。
+而当离开时，我们与C#团队密切合作，将一些Midori的方法带回C#中，
+并在C#开始探索异步模型时，也使用了async/await模型的变体大约一年之久。
+虽然我们未能将Midori的所有优点带到.NET中，但也确实实现了其中的一部分，主要是在性能方面。 
+而对于无法回到过去将.NET的task变成结构这点上，至今让我感到遗憾。
 
 <!-- 
 But I'm getting ahead of myself.  The journey to get to this point was a long one, and we should start at the beginning. 
 -->
-但我逐渐超越了自己。
-到达这一刻的旅程是漫长的，我们本应该从一开始就开始。
+但我言之过早了，到达这一步的旅程是漫长的，我们本应该尽早开始。
 
 ## Promises
 
@@ -59,11 +67,11 @@ however, was more interesting, as we'll start to see soon.  We were heavily infl
 https://en.wikipedia.org/wiki/E_(programming_language)).  Perhaps the biggest difference compared to popular
 asynchronous frameworks these days is there was no cheating.  There wasn't a single synchronous API available. 
 -->
-我们的异步模型的核心是一项名为[promise](https://en.wikipedia.org/wiki/Futures_and_promises)的技术。
-如今，这个想法已无处不在。 
-然而，我们使用promise的方式更有趣，正如我们很快将会看到的。
-我们受到[E语言系统](https://en.wikipedia.org/wiki/E_(programming_language))的强烈影响。 
-或许与流行的异步框架相比最大的不同是我们做到了完全的异步——因为我们的系统连一个同步API都没有。
+我们使用的异步模型的核心是一项名为[promise](https://en.wikipedia.org/wiki/Futures_and_promises)的技术。
+虽然在如今，这样的想法已无处不在，
+但是，我们很快将会看到，我们所使用promise的方式将更加有趣。
+受到[E语言系统](https://en.wikipedia.org/wiki/E_(programming_language))的强烈影响，
+使得这样的方式与流行的异步框架相比，最大的不同在于我们做到了完全的异步——例如，在我们的系统中，没有任何一个同步的API。
 
 <!-- 
 The first cut at the model used explicit callbacks.  This'll be familiar to anybody who's done Node.js programming.  The
@@ -71,16 +79,17 @@ idea is you get a `Promise<T>` for any operation that will eventually yield a `T
 that may be running asynchronously within the process or even remotely somewhere else.  The consumer doesn't need to
 know or care.  They just deal with the `Promise<T>` as a first class value and, when the `T` is sought, must rendezvous. 
 -->
-模型的第一次切割使用了显式回调。 
-任何使用过Node.js编程的人都会熟悉这一点。 
-我们的想法是为任何最终会产生T（或失败）的操作获得`Promise<T>`。 
-生成的操作可以在进程内异步运行，甚至可以在其他地方远程运行。
-消费者不需要知道或关心，他们只需要将`Promise<T>`作为一等类值来处理，并当需要获取`T`值时，必须进行会合操作。
+模型的最基本的方式是使用了显式的回调，而这对于 
+任何使用过Node.js编程的人都是非常熟悉。 
+这里的想法是为任何最终会产生`T`（或操作失败的结果）的操作获得一个`Promise<T>`。 
+产生的操作可以在进程内异步运行，甚至可以远程执行。
+结果的使用者无需知道具体运行的位置，他们只需要将`Promise<T>`作为一等类型来处理，
+也就是说当需要获取`T`值时，必须进行会合操作。
 
 <!-- 
 The basic callback model started something like this: 
 -->
-基本的回调模型就是这样的：
+基本的回调模型如下：
 
 <!-- 
     Promise<T> p = ... some operation ...;
@@ -93,14 +102,14 @@ The basic callback model started something like this:
         (Exception e) => { ... a failure occurred ... }
     ); 
 -->
-    Promise<T> p = ......一些操作......;
+    Promise<T> p = ... 一些操作 ...;
 
-    ...可选地与该操作并发地完成一些事情......;
+    ... 可选地与该操作并发地完成其他操作 ...;
 
     Promise<U> u = Promise.When(
         p,
-        (T t) => { ...T可用时... },
-        (Exception e) => { ...产生失败... }
+        (T t) => { ... T变得可用时 ... },
+        (Exception e) => { ... 产生失败时 ... }
     ); 
 
 <!-- 
@@ -114,16 +123,17 @@ Eventually we switched over from static to instance methods:
     ); 
 -->
     Promise<U> u = p.WhenResolved(
-        (T t) => { ...T可用时... },
-        (Exception e) => { ...产生失败... }
+        (T t) => { ... T变得可用时 ... },
+        (Exception e) => { ... 产生失败时 ... }
     ); 
 
 <!-- 
 Notice that the promises chain.  The operation's callbacks are expected to return a value of type `U` or throw an
 exception, as appropriate.  Then the recipient of the `u` promise does the same, and so on, and so forth. 
 -->
-请注意promise链，操作的回调应该返回类型`U`的值或者根据需要抛出异常。
-然后，`u`的promise接受者也会这样做，依此类推，等等。
+请注意这里的promise链：
+操作的回调返回类型为`U`的值或者根据需要抛出异常。
+然后，值为`u`的promise使用者也将如此操作，依此类推进行下去。
 
 <!-- 
 This is [concurrent](https://en.wikipedia.org/wiki/Concurrent_computing#Concurrent_programming_languages) [dataflow](
@@ -131,8 +141,10 @@ https://en.wikipedia.org/wiki/Dataflow_programming) programming.  It is nice bec
 govern the scheduling of activity in the system.  A classical system often results in work stoppage not because of true
 dependencies, but [false dependencies](https://en.wikipedia.org/wiki/Data_dependency), like the programmer just
 happening to issue a synchronous IO call deep down in the callstack, unbeknownst to the caller. -->
-这是[并发](https://en.wikipedia.org/wiki/Concurrent_computing#Concurrent_programming_languages)的[数据流](https://en.wikipedia.org/wiki/Dataflow_programming)编程。 
-这很好，因为操作的真正依赖关系控制着系统中活动的调度。 经典系统经常导致停止工作，不是因为真正的依赖关系，而是错误的依赖关系，就像程序员刚刚在调用堆栈中发出同步IO调用一样，调用者不知道。
+这是一种[并发](https://en.wikipedia.org/wiki/Concurrent_computing#Concurrent_programming_languages)的[数据流](https://en.wikipedia.org/wiki/Dataflow_programming)编程。 
+因为操作的正确依赖关系控制着系统中活动的调度。 
+经典系统经常停止工作的原因，不是因为正确的依赖关系，而是由于[错误的依赖关系](https://en.wikipedia.org/wiki/Data_dependency)所导致，
+例如在调用堆栈的深层中发出同步I/O调用，而上层的调用者对此却一无所知。
 
 <!-- 
 In fact, this is one of the reasons your screen bleaches so often on Windows.  I'll never forget a paper a few years
@@ -143,14 +155,14 @@ the UI thread.  Nothing bad happened during testing (where, presumably, the deve
 with near-perfect networks).  Sadly, when the network flaked out, the result was 10 second hangs with spinning donuts
 and bleachy white screens.  To this day, we still have this problem in every OS that I use. 
 -->
-实际上，这是您的屏幕在Windows系统上经常出现变白的原因之一。 
-我永远不会忘记几年前的一篇论文，它找到了Outlook中挂起的主要原因之一。 
-一个常用的API偶尔会尝试通过网络与打印机通信来枚举Postscript字体。 
-由于它缓存了字体，所以只需要偶尔在不可预测的时间去请求打印机。 
-因此，这种“良好”的行为使开发人员认为从UI线程进行调用是安全的。 
-这在测试期间没有发生任何不良事情（可能开发人员在昂贵的计算机上使用近乎完美的网络）。 
-但遗憾的是，当网络状况退化时，造成的结果是与旋转的甜甜圈和变白的屏幕相伴的10秒钟时间挂起。 
-而到目前为止，在我使用的每个操作系统中仍然存在此问题。
+事实上，这也是Windows系统上经常出现白屏的原因之一。 
+对此，我依然记得几年前的一篇论文，它指出了Outlook中出现挂起的主要原因：
+某个常用的API偶尔会尝试通过网络，与打印机进行通信来枚举Postscript字体。 
+由于系统缓存了字体，所以只需要偶尔去真正向打印机发出请求，即使这样的请求所花费的时间不可预测。 
+因此，这种表面“良好”的行为使开发人员误以为 从UI线程进行调用是安全的。 
+这在测试期间（开发人员在造价昂贵的计算机上使用近乎完美的网络时）未发生任何不良的后果， 
+但遗憾的是，当网络状况恶化时，造成的后果是与旋转的“甜甜圈”和白屏相伴的10秒钟的挂起。
+而到目前为止，在我使用的所有操作系统中，此问题依然存在。
 
 <!-- 
 The issue in this example is the possibility for high latency wasn't apparent to developers calling the API.  It was
@@ -158,7 +170,7 @@ even less apparent because the call was buried deep in a callstack, masked by vi
 Midori, where all asynchrony is expressed in the type system, this wouldn't happen because such an API would
 necessarily return a promise.  It's true, a developer can still do something ridiculous (like an infinite loop on the
 UI thread), but it's a lot harder to shoot yourself in the foot.  Especially when it came to IO. -->
-这个例子中问题的原因是，调用API的开发人员不明白可能产生的高延迟。 
+该例子中产生问题的原因是，调用API的开发人员不明白可能产生的高延迟。 
 它甚至不那么明显，因为调用深埋在一个调用栈中，被虚函数调用所掩盖等等。 
 在Midori中，所有的异步都在类型系统中表示，上述的例子将不会发生，因为这样的API将返回一个promise类型。 
 是的，开发人员仍然可以做一些荒谬的事情（比如在UI线程上产生死循环），
@@ -167,7 +179,7 @@ UI thread), but it's a lot harder to shoot yourself in the foot.  Especially whe
 <!-- 
 What if you didn't want to continue the dataflow chain?  No problem. 
 -->
-如果不想继续链式数据流怎么办？没问题。
+如果想停止链式数据流怎么办？这也没问题。
 <!-- 
     p.WhenResolved(
         ... as above ...
@@ -180,21 +192,21 @@ What if you didn't want to continue the dataflow chain?  No problem.
 <!-- 
 This turns out to be a bit of an anti-pattern.  It's usually a sign that you're mutating shared state. 
 -->
-结果证明这是一种反模式，它通常表明你正在改变共享状态。
+结果证明这是一种反模式，它通常表明你正在改变共享的状态。
 
 <!-- 
 The `Ignore` warrants a quick explanation.  Our language didn't let you ignore return values without being explicit
 about doing so.  This specific `Ignore` method also addded some diagnostics to help debug situations where you
 accidentally ignored something important (and lost, for example, an exception). 
 -->
-这里的`Ignore`需要一些快速的解释——我们的语言不会让你忽略返回值除非你显式地这样做。 
-同时，这种特定的`Ignore`方法还添加了一些诊断功能，
+这里的`Ignore`需要一点解释是——除非你显式地这样做，我们的语言不允许你忽略其返回值。 
+同时，这种特定的`Ignore`使用还添加了一些诊断功能，
 以帮助调试你意外忽略的重要事项（以及失败，例如异常）的情况。
 
 <!-- 
 Eventually we added a bunch of helper overloads and APIs for common patterns: 
 -->
-最后，我们为常见的模式添加了一堆作为辅助的重载和API：
+最后，我们为常见的模式添加了一些作为辅助的重载和API：
 
 <!-- 
     // Just respond to success, and propagate the error automatically:
@@ -214,12 +226,12 @@ Eventually we added a bunch of helper overloads and APIs for common patterns:
     // And so on. 
 -->
     // 只响应成功情况，并自动抛出错误：
-    Promise<U> u = p.WhenResolved((T t) => { ... T可用... });
+    Promise<U> u = p.WhenResolved((T t) => { ... T变得可用... });
 
     // 使用类似finally的结构：
     Promise<U> u = p.WhenResolved(
         (T t) => { ... T可用 ... },
-        (Exception e) => { ... 发生了故障... },
+        (Exception e) => { ... 产生失败时 ... },
         () => { ... 无条件执行... }
     );
 
@@ -234,20 +246,21 @@ This idea is most certainly not even close to new.  [Joule](https://en.wikipedia
 and [Alice](https://en.wikipedia.org/wiki/Alice_(programming_language)) even have nice built-in syntax to make the
 otherwise clumsy callback passing shown above more tolerable. 
 -->
-几乎可以确定的是，这样的想法并不能算的上是新颖的。 
-[Joule](https://en.wikipedia.org/wiki/Joule_(programming_language))和[Alice](https://en.wikipedia.org/wiki/Alice_(programming_language))甚至都有很好的内置语法，使上面显示的其他笨拙的回调传递更容易忍受。
+基本上可以确定的是，这并不能算的上是新奇的想法。 
+[Joule](https://en.wikipedia.org/wiki/Joule_(programming_language))和[Alice](https://en.wikipedia.org/wiki/Alice_(programming_language))甚至都已有了良好的内置语法支持，
+使上述的繁琐笨拙的回调传递方法变得更容易使用。
 
 <!-- 
 But it was not tolerable.  The model tossed out decades of familiar programming language constructs, like loops. 
 -->
-但这是不能容忍的，因为该模型抛弃了数十年以来熟悉的编程语言结构，例如循环等。
+但有一点无法容忍的是，该模型抛弃了数十年以来熟悉的编程语言结构，比如说循环。
 
 <!-- 
 It got really bad.  Like really, really.  It led to callback soups, often nested many levels deep, and often in some
 really important code to get right.  For example, imagine you're in the middle of a disk driver, and you see code like: 
 -->
-真的很糟糕。 真的，真的。 它导致回调汤，经常嵌套很多层次，并且通常在一些非常重要的代码中才能正确。 
-例如，假设你处于磁盘驱动程序的中间，并且您看到如下代码：
+这一点真的真的很糟糕，因为它通常会导致代码出现回调困境，以及多层次的嵌套，并且通常在一些非常重要的代码中才能正确运行。 
+例如，假设你在磁盘驱动程序中看到如下代码：
 
     Promise<void> DoSomething(Promise<string> cmd) {
         return cmd.WhenResolved(
@@ -279,7 +292,8 @@ It's just impossible to follow what's going on here.  It's hard to tell where th
 throw is unhandled, and it's easy to duplicate code (such as the error cases), because classical block scoping isn't
 available.  God forbid you need to do a loop.  And it's a disk driver -- this stuff needs to be reliable! 
 -->
-根据这里发生的事情，这是不可能的。 很难判断各种返回的返回位置，未处理的是什么，并且很容易复制代码（例如错误情况），因为经典的块作用域不可用。 上帝禁止你需要做一个循环。 它是一个磁盘驱动程序 - 这些东西需要可靠！
+根本不可能在这样的代码中搞清楚所有的清晰，因为这很难判断所有return的返回位置和所有未处理异常，并且很容易出现重复的代码（例如错误的处理），因为经典的块作用域不在适用。 
+上帝禁止你使用循环，但它是磁盘驱动程序，它需要可靠性保证！
 
 <!-- 
 ## Enter Async and Await
@@ -292,7 +306,8 @@ available.  God forbid you need to do a loop.  And it's a disk driver -- this st
 http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4134.pdf) now features async and/or await-like constructs.
 We began wide-scale use sometime in 2009.  And when I say wide-scale, I mean it. 
 -->
-[几乎](https://msdn.microsoft.com/en-us/library/hh156528.aspx)[所有](http://tc39.github.io/ecmascript-asyncawait/)[主要](https://www.python.org/dev/peps/pep-0492/)[语言](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4134.pdf)现在都具有异步和/或等待结构。 我们在2009年的某个时候开始大规模使用。当我说大规模时，我的意思是。
+[几乎](https://msdn.microsoft.com/en-us/library/hh156528.aspx)[所有](http://tc39.github.io/ecmascript-asyncawait/)的[主要](https://www.python.org/dev/peps/pep-0492/)[编程语言](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4134.pdf)都已具有类似async和/或await的数据结构。 
+我们在2009年时，也已经开始大规模使用。当我说大规模时，我说的是真的。
 
 <!-- 
 The async/await approach let us keep the non-blocking nature of the system and yet clean up some of the above usability
@@ -302,20 +317,29 @@ http://blogs.msdn.com/b/dsyme/archive/2007/10/11/introducing-f-asynchronous-work
 http://research.microsoft.com/apps/pubs/default.aspx?id=147194)).  And despite the boon to usability and productivity,
 it was also enormously controversial on the team.  More on that later. 
 -->
-异步/等待方法让我们保持系统的非阻塞性质，并清除上述一些可用性混乱。 事后看来，这是非常明显的，但是请记住，那时候大规模使用的最主流语言是F＃及其异步工作流程（另见本文）。 尽管对可用性和生产力有所帮助，但在团队中也存在巨大争议。 稍后会详细介绍。
+async/await的方法让我们的系统保持了非阻塞的性质，并消除了上述可用性方面的混乱。 
+事后看来，这些优势是非常明显的，
+但是请不要忘了，在当时大规模使用的最主流语言还是F#及其[异步工作流](
+http://blogs.msdn.com/b/dsyme/archive/2007/10/11/introducing-f-asynchronous-workflows.aspx) 
+（另见[此文](http://research.microsoft.com/apps/pubs/default.aspx?id=147194)）。 
+尽管async/await对可用性和生产力带来了提升，
+但在团队中也存在巨大争议，对于此，我将在稍后详细介绍。
 
 <!-- 
 What we had was a bit different from what you'll find in C# and .NET.  Let's walk through the progression from the
 promises model above to this new async/await-based one.  As we go, I'll point out the differences. 
 -->
-我们所拥有的与C＃和.NET中的内容略有不同。 让我们来看看从上面的promises模型到这个新的async / await-based的过程。 我们走了，我会指出差异。
+我们所拥有的与C#和.NET中的内容略有不同。 
+让我们来看看从上面的promise模型演进到新的基于async/await模型的过程。 
+并且在抽丝剥茧的过程中，逐步指出其中的差异。
 
 <!-- 
 We first renamed `Promise<T>` to `AsyncResult<T>`, and made it a struct.  (This is similar to .NET's `Task<T>`, however
 focuses more on the "data" than the "computation.")  A family of related types were born:
 -->
-我们首先将Promise <T>重命名为AsyncResult <T>，并将其作为结构。 
-（这类似于.NET的Task <T>，但更多地关注“数据”而不是“计算”。）一系列相关类型诞生了：
+我们首先将`Promise<T>`重命名为`AsyncResult<T>`，并将其作为结构体 
+（这一点类似于.NET的`Task<T>`，但其更多地关注于“数据”而不是“计算”）。
+便产生了如下的一系列相关的类型：
 
 <!-- 
 * `T`: the result of a prompt, synchronous computation that cannot fail.
@@ -323,33 +347,35 @@ focuses more on the "data" than the "computation.")  A family of related types w
 * `Result<T>`: the result of a a prompt, synchronous computation that might fail.
 * `AsyncResult<T>`: the result of an asynchronous computation that might fail. 
 -->
-* `T`：即时，同步计算的结果，不能失败。
-* `Async <T>`：异步计算的结果，不能失败。
-* `Result <T>`：可能失败的提示同步计算的结果。
-* `AsyncResult <T>`：可能失败的异步计算的结果。
+* `T`：即时同步计算的结果，并且不会产生失败
+* `Async<T>`：异步计算的结果，并且不会产生失败
+* `Result<T>`：可能失败的即时同步计算的结果值
+* `AsyncResult<T>`：可能失败的异步计算的结果值
 
 <!-- 
 That last one was really just a shortcut for `Async<Result<T>>`. 
 -->
-最后一个实际上只是`Async<Result<T>>`的快捷方式。
+最后一个实际上只是`Async<Result<T>>`的简写值。
 
 <!-- 
 The distinction between things that can fail and things that cannot fail is a topic for another day.  In summary,
 however, our type system guaranteed these properties for us. 
 -->
-可能失败的事物和不能失败的事物之间的区别是另一天的主题。 但总之，我们的类型系统为我们保证了这些属性。
+可能失败的值和不会产生失败的值之间的区别又是另外一个主题。
+但总之，我们的类型系统为我们保证了它们的属性。
 
 <!--
 Along with this, we added the `await` and `async` keywords.  A method could be marked `async`: 
 -->
-与此同时，我们添加了`await`和`async`关键字。 一个方法可以标记为`async`：
+同时，增加了`await`和`async`关键字。 
+方法可以标记为`async`：
 
     async int Foo() { ... }
 
 <!-- 
 All this meant was that it was allowed to `await` inside of it: 
 -->
-所有这一切意味着它被允许在其中“等待”：
+这意味着允许在方法的内部存在`await`关键字：
 
     async int Bar() {
         int x = await Foo();
@@ -361,21 +387,24 @@ All this meant was that it was allowed to `await` inside of it:
 Originally this was merely syntactic sugar for all the callback goop above, like it is in C#.  Eventually, however, we
 went way beyond this, in the name of performance, and added lightweight coroutines and linked stacks.  More below. 
 -->
-最初这只是上面所有回调goop的语法糖，就像它在C＃中一样。 然而，最终，我们以性能的名义超越了这一点，并添加了轻量级协同程序和链接堆栈。 更多下面。
+正如它们在C#中的那样，`async`/`await`仅仅作为上述回调方法的语法糖而存在。 
+但是最终，我们从性能的角度出发，使得其存在意义更加广泛，并在其基础上添加了轻量级协程和链接栈。 
+其有关的更多内容如下。
 
 <!-- 
 A caller invoking an `async` method was forced to choose: use `await` and wait for its result, or use `async` and
 launch an asynchronous operation.  All asynchrony in the system was thus explicit: 
 -->
-调用`async`方法的调用者被迫选择：使用`await`并等待其结果，或使用`async`并启动异步操作。 因此，系统中的所有异步都是明确的：
+调用`async`方法的调用者必须进行如下的二选一：使用`await`并等待其结果，或使用`async`并启动异步的操作。 
+因此，系统中的所有异步操作都将显式进行：
 <!-- 
     int x = await Bar();        // Invoke Bar, but wait for its result.
     Async<int> y = async Bar(); // Invoke Bar asynchronously; I'll wait later.
     int z = await y;            // ...like now.  This waits for Bar to finish. 
 -->
-    int x = await Bar();        // 调用Bar，但等待其结果。
-    Async<int> y = async Bar(); // 异步调用Bar; 我等一会儿。
-    int z = await y;            // ...像现在。 这等待Bar完成。
+    int x = await Bar();        // 调用Bar，并在原地等待其结果。
+    Async<int> y = async Bar(); // 异步调用Bar，并在未来某个时刻等待。
+    int z = await y;            // ... 有点像立刻求值，它将等待Bar操作完成。
 
 <!-- 
 This also gave us a very important, but subtle, property that we didn't realize until much later.  Because in Midori the
@@ -384,13 +413,17 @@ told us the full set of things that could "wait."  More importantly, it told us 
 wait, which told us what was pure synchronous computation!  This could be used to guarantee no code ever blocked the
 UI from painting and, as we'll see below, many other powerful capabilities. 
 -->
-这也给了我们一个非常重要但又微妙的财产，直到很久以后我们才意识到这一点。 因为在Midori中，“等待”某事的唯一方法是使用异步模型，并且没有隐藏的阻塞，我们的类型系统告诉我们可以“等待”的全套事情。更重要的是，它告诉我们完整的 那些无法等待的东西，告诉我们什么是纯粹的同步计算！ 这可以用来保证没有代码阻止UI绘画，正如我们将在下面看到的，还有许多其他强大的功能。
+直到很久以后我们才意识到，这样的作法给我们带来了非常重要但又微妙的优势。 
+因为在Midori中，“等待”某个事件的唯一方法是使用异步模型，并且没有隐藏的阻塞，我们的类型系统已经隐含的我们可以“等待”的全套事情。更重要的是，它告诉我们完整的 那些无法等待的东西，告诉我们什么是纯粹的同步计算！
+因此，这可用于保证没有代码阻止UI绘制，
+也正如我们将在下面看到的一样，还包含许多其他强大的功能。
 
 <!-- 
 Because of the sheer magnitude of asynchronous code in the system, we embellished lots of patterns in the language that
 C# still doesn't support.  For example, iterators, for loops, and LINQ queries: 
 -->
-由于系统中异步代码的绝对规模，我们在C＃仍然不支持的语言中修饰了许多模式。 例如，迭代器，for循环和LINQ查询：
+由于系统中异步代码的绝对规模，我们在语言中增加了许多C#仍然不支持的模式，这包括迭代器（iterator），for循环和LINQ查询：
+
     IAsyncEnumerable<Movie> GetMovies(string url) {
         foreach (await var movie in http.Get(url)) {
             yield return movie;
@@ -400,7 +433,7 @@ C# still doesn't support.  For example, iterators, for loops, and LINQ queries:
 <!-- 
 Or, in LINQ style: 
 -->
-或者，在LINQ风格：
+或使用LINQ风格：
 
     IAsyncEnumerable<Movie> GetMovies(string url) {
         return
@@ -412,25 +445,31 @@ Or, in LINQ style:
 <!-- 
 The entire LINQ infrastructure participated in streaming, including resource management and backpressure. 
 -->
-整个LINQ基础架构参与了流媒体，包括资源管理和背压。
+整个LINQ基础架构也在流式计算中有参与，这包括资源管理和[背压（backpressure）](https://github.com/ReactiveX/RxJava/wiki/Backpressure)方面。
 
 <!-- 
 We converted millions of lines of code from the old callback style to the new async/await one.  We found plenty of bugs
 along the way, due to the complex control flow of the explicit callback model.  Especially in loops and error handling
 logic, which could now use the familiar programming language constructs, rather than clumsy API versions of them. 
 -->
-我们将数百万行代码从旧的回调样式转换为新的异步/等待代码。 由于显式回调模型的复杂控制流，我们发现了大量的错误。 特别是在循环和错误处理逻辑中，它现在可以使用熟悉的编程语言结构，而不是笨拙的API版本。
+我们将数百万行的代码从旧的回调方式转换为新的async/await模式的代码。 
+在显式回调模型的复杂控制流中，我们发现了大量的bug。
+特别对于循环和错误处理逻辑，
+它们现在可使用熟悉的编程语言结构，而不是笨拙的API的方式加以实现。
 
 <!-- 
 I mentioned this was controversial.  Most of the team loved the usability improvements.  But it wasn't unanimous. 
 -->
-我提到这是有争议的。 大多数团队都喜欢可用性改进。 但它并非一致。
+我已经提到过，对于这点是有争议的，团队中的大多数都乐见可用性上的改进，但并非所有。
+
 <!-- 
 Maybe the biggest problem was that it encouraged a pull-style of concurrency.  Pull is where a caller awaits a callee
 before proceeding with its own operations.  In this new model, you need to go out of your way to *not* do that.  It's
 always possible, of course, thanks to the `async` keyword, but there's certainly a little more friction than the old
 model. The old, familiar, blocking model of waiting for things is just an `await` keyword away. -->
-也许最大的问题是它鼓励了一种拉式并发。 拉是调用者在继续自己的操作之前等待被调用者的地方。 在这个新模型中，你需要不要那样做。 当然，这总是可能的，这要归功于`async`关键字，但肯定比旧模型有更多的摩擦。 旧的，熟悉的，等待事物的阻塞模型只是一个`await`关键词。
+也许最大问题是回调模型采用了一种pull风格的并发。
+在这种方式中，调用者在继续自己的操作之前需等待被调用者。 在这个新模型中，你需要不要那样做。 当然，这总是可能的，这要归功于`async`关键字，但肯定比旧模型有更多的摩擦。 
+旧的熟悉，阻塞模型变成了一个简单的`await`关键字。
 
 <!-- 
 We offered bridges between pull and push, in the form of [reactive](https://rx.codeplex.com/)
