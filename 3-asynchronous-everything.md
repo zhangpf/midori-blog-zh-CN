@@ -171,7 +171,7 @@ Midori, where all asynchrony is expressed in the type system, this wouldn't happ
 necessarily return a promise.  It's true, a developer can still do something ridiculous (like an infinite loop on the
 UI thread), but it's a lot harder to shoot yourself in the foot.  Especially when it came to IO. -->
 该例子中产生问题的原因是，调用API的开发人员不明白可能产生的高延迟。 
-它甚至不那么明显，因为调用深埋在一个调用栈中，被虚函数调用所掩盖等等。 
+这种延迟甚至不那么明显，因为其调用深埋在调用栈中，被虚函数调用所掩盖等等。 
 在Midori中，所有的异步都在类型系统中表示，上述的例子将不会发生，因为这样的API将返回一个promise类型。 
 是的，开发人员仍然可以做一些荒谬的事情（比如在UI线程上产生死循环），
 但是像这种搬起石头砸自己的脚的事情将变得困难得多，特别是当涉及到I/O操作时。
@@ -253,13 +253,13 @@ otherwise clumsy callback passing shown above more tolerable.
 <!-- 
 But it was not tolerable.  The model tossed out decades of familiar programming language constructs, like loops. 
 -->
-但有一点无法容忍的是，该模型抛弃了数十年以来熟悉的编程语言结构，比如说循环。
+但有一点无法容忍的是，该模型抛弃了数十年以来熟悉的编程语言结构，例如循环。
 
 <!-- 
 It got really bad.  Like really, really.  It led to callback soups, often nested many levels deep, and often in some
 really important code to get right.  For example, imagine you're in the middle of a disk driver, and you see code like: 
 -->
-这一点真的真的很糟糕，因为它通常会导致代码出现回调困境，以及多层次的嵌套，并且通常在一些非常重要的代码中才能正确运行。 
+这一点真的真的很糟糕，因为它往往会导致代码出现回调困境，以及多层次的嵌套，并且通常在一些非常重要的代码中才能正确运行。 
 例如，假设你在磁盘驱动程序中看到如下代码：
 
     Promise<void> DoSomething(Promise<string> cmd) {
@@ -292,13 +292,16 @@ It's just impossible to follow what's going on here.  It's hard to tell where th
 throw is unhandled, and it's easy to duplicate code (such as the error cases), because classical block scoping isn't
 available.  God forbid you need to do a loop.  And it's a disk driver -- this stuff needs to be reliable! 
 -->
-根本不可能在这样的代码中搞清楚所有的清晰，因为这很难判断所有return的返回位置和所有未处理异常，并且很容易出现重复的代码（例如错误的处理），因为经典的块作用域不在适用。 
-上帝禁止你使用循环，但它是磁盘驱动程序，它需要可靠性保证！
+那么根本不可能在这样的代码中搞清楚所有的逻辑，
+因为这很难判断所有return的返回位置和所有未处理异常，
+并且很容易出现重复的代码（例如错误处理），
+因为God禁止你使用循环，所以经典的块作用域不再适用。
+但这是磁盘驱动程序，需要可靠性保证！
 
 <!-- 
 ## Enter Async and Await
 -->
-## 进入Async和Await
+## 进入到Async和Await的世界
 
 <!-- 
 [Almost](https://msdn.microsoft.com/en-us/library/hh156528.aspx) [every](http://tc39.github.io/ecmascript-asyncawait/)
@@ -307,7 +310,7 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4134.pdf) now features 
 We began wide-scale use sometime in 2009.  And when I say wide-scale, I mean it. 
 -->
 [几乎](https://msdn.microsoft.com/en-us/library/hh156528.aspx)[所有](http://tc39.github.io/ecmascript-asyncawait/)的[主要](https://www.python.org/dev/peps/pep-0492/)[编程语言](http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2014/n4134.pdf)都已具有类似async和/或await的数据结构。 
-我们在2009年时，也已经开始大规模使用。当我说大规模时，我说的是真的。
+我们在2009年时，也已经开始大规模使用。当我说大规模使用时，我说的是真的。
 
 <!-- 
 The async/await approach let us keep the non-blocking nature of the system and yet clean up some of the above usability
@@ -318,7 +321,7 @@ http://research.microsoft.com/apps/pubs/default.aspx?id=147194)).  And despite t
 it was also enormously controversial on the team.  More on that later. 
 -->
 async/await的方法让我们的系统保持了非阻塞的性质，并消除了上述可用性方面的混乱。 
-事后看来，这些优势是非常明显的，
+事后看来，这种优势是非常明显的，
 但是请不要忘了，在当时大规模使用的最主流语言还是F#及其[异步工作流](
 http://blogs.msdn.com/b/dsyme/archive/2007/10/11/introducing-f-asynchronous-workflows.aspx) 
 （另见[此文](http://research.microsoft.com/apps/pubs/default.aspx?id=147194)）。 
@@ -329,9 +332,9 @@ http://blogs.msdn.com/b/dsyme/archive/2007/10/11/introducing-f-asynchronous-work
 What we had was a bit different from what you'll find in C# and .NET.  Let's walk through the progression from the
 promises model above to this new async/await-based one.  As we go, I'll point out the differences. 
 -->
-我们所拥有的与C#和.NET中的内容略有不同。 
-让我们来看看从上面的promise模型演进到新的基于async/await模型的过程。 
-并且在抽丝剥茧的过程中，逐步指出其中的差异。
+我们所设计的async/await的与C#和.NET中的略有不同。 
+让我们来看看从上面的promise模型演进到新的基于async/await模型的过程。
+并且在抽丝剥茧的过程中，逐渐指出其中的差异。
 
 <!-- 
 We first renamed `Promise<T>` to `AsyncResult<T>`, and made it a struct.  (This is similar to .NET's `Task<T>`, however
@@ -355,7 +358,7 @@ focuses more on the "data" than the "computation.")  A family of related types w
 <!-- 
 That last one was really just a shortcut for `Async<Result<T>>`. 
 -->
-最后一个实际上只是`Async<Result<T>>`的简写值。
+最后一个实际上是`Async<Result<T>>`的简写值。
 
 <!-- 
 The distinction between things that can fail and things that cannot fail is a topic for another day.  In summary,
@@ -368,14 +371,14 @@ however, our type system guaranteed these properties for us.
 Along with this, we added the `await` and `async` keywords.  A method could be marked `async`: 
 -->
 同时，增加了`await`和`async`关键字。 
-方法可以标记为`async`：
+一个方法可以标记为`async`：
 
     async int Foo() { ... }
 
 <!-- 
 All this meant was that it was allowed to `await` inside of it: 
 -->
-这意味着允许在方法的内部存在`await`关键字：
+这意味着方法的内部允许存在`await`关键字：
 
     async int Bar() {
         int x = await Foo();
@@ -414,9 +417,10 @@ wait, which told us what was pure synchronous computation!  This could be used t
 UI from painting and, as we'll see below, many other powerful capabilities. 
 -->
 直到很久以后我们才意识到，这样的作法给我们带来了非常重要但又微妙的优势。 
-因为在Midori中，“等待”某个事件的唯一方法是使用异步模型，并且没有隐藏的阻塞，我们的类型系统已经隐含的我们可以“等待”的全套事情。更重要的是，它告诉我们完整的 那些无法等待的东西，告诉我们什么是纯粹的同步计算！
-因此，这可用于保证没有代码阻止UI绘制，
-也正如我们将在下面看到的一样，还包含许多其他强大的功能。
+因为在Midori中，“等待”某个事件的唯一方法是使用异步模型，并且没有任何的阻塞代码是类型系统隐式提供的。
+更重要的是，这种方式告诉了我们所有无法用于“等待”的情况，并告知我们什么是纯粹的同步计算！
+因此，这种方式可用于保证没有代码会阻止UI进行绘制，
+也正如将在如下看到的一样，它还包含许多其他强大的功能。
 
 <!-- 
 Because of the sheer magnitude of asynchronous code in the system, we embellished lots of patterns in the language that
@@ -445,7 +449,7 @@ Or, in LINQ style:
 <!-- 
 The entire LINQ infrastructure participated in streaming, including resource management and backpressure. 
 -->
-整个LINQ基础架构也在流式计算中有参与，这包括资源管理和[背压（backpressure）](https://github.com/ReactiveX/RxJava/wiki/Backpressure)方面。
+整个LINQ基础架构也在流式计算中有参与，这其中包括资源管理和[背压（backpressure）](https://github.com/ReactiveX/RxJava/wiki/Backpressure)。
 
 <!-- 
 We converted millions of lines of code from the old callback style to the new async/await one.  We found plenty of bugs
@@ -460,7 +464,7 @@ logic, which could now use the familiar programming language constructs, rather 
 <!-- 
 I mentioned this was controversial.  Most of the team loved the usability improvements.  But it wasn't unanimous. 
 -->
-我已经提到过，对于这点是有争议的，团队中的大多数都乐见可用性上的改进，但并非所有。
+我已经提到过，对于这点是有争议的：虽然团队中的大多数都乐见可用性上的改进，但也并非所有人都持此观点。
 
 <!-- 
 Maybe the biggest problem was that it encouraged a pull-style of concurrency.  Pull is where a caller awaits a callee
@@ -468,8 +472,9 @@ before proceeding with its own operations.  In this new model, you need to go ou
 always possible, of course, thanks to the `async` keyword, but there's certainly a little more friction than the old
 model. The old, familiar, blocking model of waiting for things is just an `await` keyword away. -->
 也许最大问题是回调模型采用了一种pull风格的并发。
-在这种方式中，调用者在继续自己的操作之前需等待被调用者。 在这个新模型中，你需要不要那样做。 当然，这总是可能的，这要归功于`async`关键字，但肯定比旧模型有更多的摩擦。 
-旧的熟悉，阻塞模型变成了一个简单的`await`关键字。
+在这种方式中，调用者在继续自己的操作之前需等待被调用者。 在这个新模型中，你需要不再要这样做。 
+当然，可能这总是归功于`async`关键字，但这肯定比旧式模型带来更多的摩擦。
+旧式熟悉的阻塞模型变成了一个简单的`await`关键字。
 
 <!-- 
 We offered bridges between pull and push, in the form of [reactive](https://rx.codeplex.com/)
@@ -478,15 +483,20 @@ actions that didn't employ dataflow, they were useful.  In fact, our entire UI f
 [functional reactive programming](https://en.wikipedia.org/wiki/Functional_reactive_programming), which required a
 slight divergence from the Reactive Framework in the name of performance.  But alas, this is a post on its own. 
 -->
-我们以[反应式](https://rx.codeplex.com/)的`IObservable<T>`/`IObserver<T>`适配器的形式提供了pull和push之间的桥接。 我不会声称它们非常成功，但是对于没有使用数据流的边效行为，它们很有用。 实际上，我们的整个UI框架都基于[功能反应式编程](https://en.wikipedia.org/wiki/Functional_reactive_programming)的概念，这需要在性能名称上与Reactive Framework略有不同。 但是，唉，这是一个独立的帖子。
+我们以[反应式](https://rx.codeplex.com/)的`IObservable<T>`/`IObserver<T>`适配器的形式提供了pull和push之间的桥接。 
+虽然不敢宣称它非常成功，但是对于没有使用数据流的带有副作用的行为，它们很有用。 
+实际上，我们整个UI框架都基于[函数式反应式编程](https://zh.wikipedia.org/wiki/%E5%87%BD%E6%95%B0%E5%BC%8F%E5%8F%8D%E5%BA%94%E5%BC%8F%E7%BC%96%E7%A8%8B)的概念，在性能的名义上，它与反应性框架（Reactive Framework）略有不同。 
+但对于此问题，需要一篇独立的文章进行描述，本文将不再展开。
 
 <!-- 
 An interesting consequence was a new difference between a method that awaits before returning a `T`, and one that
 returns an `Async<T>` directly.  This difference didn't exist in the type system previously.  This, quite frankly,
 annoyed the hell out of me and still does.  For example: 
 -->
-一个有趣的结果是在返回`T`之前等待的方法和直接返回`Async<T>`的方法之间的新区别。 
-先前在类型系统中不存在这种差异。 坦率地说，这让我很生气，但仍然如此。 例如：
+一个有趣的后果是在返回`T`之前的await方法和直接返回`Async<T>`的方法之间产生的新区别。 
+而在先前在类型系统中不存在此类差异。 
+坦率地说，这让我感到非常烦恼，而也仍然如此。 
+比如说：
 
     async int Bar()  { return await Foo(); }
     Async<int> Bar() { return async Foo(); }
@@ -496,9 +506,9 @@ We would like to claim the performance between these two is identical.  But alas
 a stack frame alive, whereas the latter does not.  Some compiler cleverness can help address common patterns -- this is
 really the moral equivalent to an asynchronous tail call -- however it's not always so cut and dry. 
 -->
-我们想声称这两者之间的表现是相同的。 
-但唉，事实并非如此。 前者阻止并保持堆栈帧活着，而后者则不然。 
-一些编译器的聪明可以帮助解决常见的模式 - 这实际上是异步尾调用的道德等效 - 但它并不总是那么简单和干燥。
+我们想声称这两者的表现是等价的，但是事实并非如此。 
+前者阻塞并保持堆栈帧活跃，而后者却不能。 
+一些编译器可以巧妙地解决这种常见的模式——这实际上是异步尾调用的道德等效——但事情并不总是这么简单。
 
 <!-- 
 On its own, this wasn't a killer.  It caused some anti-patterns in important areas like streams, however.  Developers
@@ -507,13 +517,20 @@ frames that really didn't need to be there.  We had good solutions to most patte
 we struggled with this, especially in the networking stack that was chasing 10GB NIC saturation at wire speed.  We'll
 discuss some of the techniques we employed below. 
 -->
-就其本身而言，这不是一个杀手。 然而，它在流等重要领域引起了一些反模式。 开发人员倾向于等待他们过去只能传递`Async<T>`的区域，从而导致累积的暂停堆栈帧真的不需要存在。 我们对大多数模式都有很好的解决方案，但直到项目结束时我们都在努力解决这个问题，尤其是在以线速追逐10GB网卡饱和度的网络堆栈中。 我们将讨论下面采用的一些技术。
+就其本身而言，这个问题不是非常严重。 
+然而，它在流式处理等重要领域引起了一些反模式情况。 
+开发人员倾向于await他们过去传递`Async<T>`的区域，
+从而导致积累的暂停堆栈帧真的不需要存在。 
+我们对大多数的模式都有很好的解决方案，但直到项目结束时我们都在努力解决这个问题，
+尤其是在追求10Gb网卡的饱和度的网络堆栈中。 
+我们将在下面讨论所采用的一些技术。
 
 <!-- 
 But at the end of this journey, this change was well worth it, both in the simplicity and usability of the model, and
 also in some of the optimization doors it opened up for us. 
 -->
-但是在这次旅程结束时，这种变化非常值得，无论是在模型的简单性和可用性方面，还是在为我们打开的一些优化门中。
+但是在这次探索之旅结束时，这样的变化是非常值得的，
+无论是在模型的简单性和可用性方面，还是在为我们打开的一些优化大门中。
 
 <!-- 
 ## The Execution Model 
@@ -523,7 +540,8 @@ also in some of the optimization doors it opened up for us.
 <!-- 
 That brings me to the execution model.  We went through maybe five different models, but landed in a nice place. 
 -->
-这让我想到了执行模型。 我们经历了五种不同的模型，但降落在一个不错的地方。
+这让我想到了执行模型。 
+我们经历了五种不同的模型，但都降落在一个不错的地方。
 
 <!-- A key to achieving asynchronous everything was ultra-lightweight processes.  This was possible thanks to [software
 isolated processes (SIPs)](http://research.microsoft.com/apps/pubs/default.aspx?id=71996), building upon [the foundation
