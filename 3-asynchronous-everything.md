@@ -540,13 +540,14 @@ also in some of the optimization doors it opened up for us.
 <!-- 
 That brings me to the execution model.  We went through maybe five different models, but landed in a nice place. 
 -->
-这让我想到了执行模型。 
-我们经历了五种不同的模型，但都降落在一个不错的地方。
+这种变化让我首先想到的是执行模型。 
+我们经历了五种不同的模型，但都取得不错的结果。
 
 <!-- A key to achieving asynchronous everything was ultra-lightweight processes.  This was possible thanks to [software
 isolated processes (SIPs)](http://research.microsoft.com/apps/pubs/default.aspx?id=71996), building upon [the foundation
 of safety described in an earlier post](http://joeduffyblog.com/2015/11/03/a-tale-of-three-safeties/). -->
-实现异步一切的关键是超轻量级流程。 这可以归功于[软件隔离过程（SIP）](http://research.microsoft.com/apps/pubs/default.aspx?id=71996)，建立在[早期帖子中描述的安全基础之上](http://joeduffyblog.com/2015/11/03/a-tale-of-three-safeties/)。
+实现“异步皆一切”的关键是超轻量级的进程。
+这归功于在[一篇早期帖子中描述的安全基础](http://joeduffyblog.com/2015/11/03/a-tale-of-three-safeties/)所建立的[软件隔离过程（SIP）](http://research.microsoft.com/apps/pubs/default.aspx?id=71996)之上。
 
 <!-- 
 The absence of shared, mutable static state helped us keep processes small.  It's surprising how much address space is
@@ -558,7 +559,17 @@ nightly in our lab and had a "ratcheting" process where every sprint we ensured 
 of us got in a room every week to look at the numbers and answer the question of why they went up, down, or stayed the
 same. We had this culture for performance generally, but in this case, it kept the base of the system light and nimble. 
 -->
-缺乏共享的，可变的静态状态帮助我们保持流程小。 令人惊讶的是，在具有表和可变静态变量的典型程序中，有多少地址空间被烧毁。 并且可以花费多少启动时间来初始化所述状态。 正如我之前提到的，我们将大多数静态函数冻结为在许多进程中共享的常量。 执行模型也导致更便宜的堆栈（下面更多），这也是一个关键因素。 这里最后的帮助甚至不是技术，而是文化。 我们在实验室中每晚测量过程开始时间和过程足迹，并进行“棘轮”过程，我们确保每次冲刺都比上一次冲刺更好。 我们一群人每周进入一个房间来查看数字并回答他们为什么上升，下降或保持不变的问题。 我们一般都有这种文化表现，但在这种情况下，它保持了系统的基础和灵活。
+缺乏共享可变的静态状态可使得我们将进程。 
+令人惊讶的是，在具有table和可变静态变量的典型程序中，有大量的地址空间被破坏，
+以及花费大量的启动时间来初始化上面提到的共享区域。 
+正如我之前提到的，我们将大多数的静态函数固化为在许多进程中共享的常量。
+执行模型使得堆栈的开销变得更小（更多的将在下文种提到），这也是一个关键因素。 
+但是最后的贡献力量甚至却不是技术，而是文化。 
+我们在实验环境中每天测量进程启动时间和资源的使用量，
+并进行优化的过程，我们确保每次冲刺都比上一次有所提高。 
+我们中的一群人每周会进入一个房间，
+对着各种数字并回答关于性能为什么上升/下降或保持不变的问题。 
+我们普遍都有这种关于性能的文化，并通过这种方式，保持了系统基础的轻量和灵活。
 
 <!-- 
 Code running inside processes could not block.  Inside the kernel, blocking was permitted in select areas, but remember
@@ -568,21 +579,33 @@ that touching a piece of memory may physically block to perform IO.  I have to s
 a welcome that, to this day, the first thing I do on a new Windows sytem is disable paging.  I would much rather have
 the OS kill programs when it is close to the limit, and continue running reliably, than to deal with a paging madness. 
 -->
-在进程内运行的代码无法阻止。 在内核中，允许在选定区域中进行阻塞，但是请记住在内核中没有运行任何用户代码，因此这是一个实现细节。 当我说“没有阻塞”时，我的意思是：Midori没有[按需分页](https://en.wikipedia.org/wiki/Demand_paging)，在传统系统中，这意味着触摸一块内存可能会物理阻塞执行IO。 我不得不说，缺乏页面颠簸是如此受欢迎，直到今天，我在新的Windows系统上做的第一件事就是禁用分页。 我非常希望操作系统在接近极限时杀死程序，并继续可靠地运行，而不是处理分页疯狂。
+在进程内运行的代码无法被阻塞。 
+在内核中，代码允许在指定区域中被阻塞，
+但是请记住在内核中没有运行任何用户态的代码，
+因此这是一个实现的细节。
+这里当我说“没有阻塞”时，我的意思是：
+Midori没有[按需换页](https://en.wikipedia.org/wiki/Demand_paging)的机制。
+在传统的操作系统中，这意味着对内存的访问可能会物理阻塞以执行I/O操作。
+我不得不说的是，没有按需换页所带来的页面抖动是如此的受欢迎，
+以致直到了今天，我在新的Windows系统上所做的第一件事就是禁用分页。
+与其愚蠢地进行换页操作，我更希望操作系统在内存不足时杀死进程，并继续可靠地运行。
 
 <!-- 
 C#'s implementation of async/await is entirely a front-end compiler trick.  If you've ever run ildasm on the resulting
 assembly, you know: it lifts captured variables into fields on an object, rewrites the method's body into a state
 machine, and uses Task's continuation passing machinery to keep the iterator-like object advancing through the states. 
 -->
-C＃的async / await实现完全是一个前端编译技巧。 如果你曾经在生成的程序集上运行ildasm，你知道：它将捕获的变量提升到对象的字段中，将方法的主体重写为状态机，并使用Task的继续传递机制来保持类似迭代器的对象前进通过 状态。
+C#的async/await实现完全是一个前端的编译技巧。 
+如果你曾在生成的汇编上运行过ildasm，那么你就知道：
+它将捕获的变量提升到对象的字段中，将方法的主体重写为状态机形式，
+并使用Task的继续传递机制来保持类迭代器对象向前通过状态。
 
 <!-- 
 We began this way and shared some of our key optimizations with the C# and .NET teams.  Unfortunately, the result at
 the scale of what we had in Midori simply didn't work. 
 -->
-我们以这种方式开始并与C＃和.NET团队分享了一些关键的优化。 
-不幸的是，我们在Midori所拥有的规模的结果根本不起作用。
+我们以这种方式开始并与C#和.Net团队分享了一些关键的优化方法。 
+但不幸的是，在Midori所达到的规模上，.Net根本无法工作。
 
 <!-- 
 First, remember, Midori was an entire OS written to use garbage collected memory.  We learned some key lessons that were
@@ -595,73 +618,96 @@ the fine-grained process model, where each process had a distinct heap that was 
 entire article devoted to how we got good behavior out of our garbage collector, but this was the most important
 architectural characteristic. 
 -->
-首先，请记住，Midori是一个使用垃圾收集内存编写的整个操作系统。 
+首先，请记住，Midori是一个为使用内存垃圾回收而编写的整个操作系统。 
 我们学到了一些必要的关键课程，以便充分发挥这一作用。 但我要说的是，主要指令是避免像瘟疫一样多余的分配。 即使是短命的。 在早期有一个渗透.NET的口头禅：Gen0系列是免费的。 不幸的是，这形成了很多.NET的库代码，并且是彻头彻尾的h .. Gen0集合引入了暂停，脏缓存，并在高度并发的系统中引入了[拍频问题](https://en.wikipedia.org/wiki/Beat_(acoustics))。 然而，我要指出，在Midori规模上进行垃圾收集工作的一个技巧恰恰是细粒度的流程模型，其中每个流程都有一个独立的堆，可以独立收集。 我将有一篇专门介绍我们如何通过垃圾收集器获得良好行为的文章，但这是最重要的架构特征。
 
 <!-- 
 The first key optimization, therefore, is that an async method that doesn't await shouldn't allocate anything. 
 -->
-因此，第一个关键优化是不等待的异步方法不应该分配任何东西。
+因此，首要的关键优化是async异步方法不应该分配任何内存。
 
 <!-- 
 We were able to share this experience with .NET in time for C#'s await to ship.  Sadly, by then, .NET's Task had
 already been made a class.  Since .NET requires async method return types to be Tasks, they cannot be zero-allocation
 unless you go out of your way to use clumsy patterns like caching singleton Task objects. 
 -->
-我们能够及时与.NET分享这一经验，以便C＃等待发货。 可悲的是，到那时，.NET的任务已经成为一个类。 由于.NET要求异步方法返回类型为Tasks，因此它们不能为零分配，除非您不遗余力地使用诸如缓存单例Task对象之类的笨拙模式。
+我们能够及时与.NET分享这一经验，以便C#中await的发布。 
+可惜的是，到那时，.Net的Task已经成为一个类。 
+由于.Net要求异步方法的返回类型为Task，因此它们变成零分配状态，
+除非你不遗余力地使用类似缓存单例Task对象之类的笨拙模式。
 
 <!-- 
 The second key optimization was to ensure that async methods that awaited allocated as little as possible. 
 -->
-第二个关键优化是确保等待分配的异步方法尽可能少。
+第二个关键优化是确保await所分配的async方法尽可能少。
 
 <!-- 
 In Midori, it was very common for one async method to invoke another, which invoked another ... and so on.  If you think
 about what happens in the state machine model, a leaf method that blocks triggers a cascade of O(K) allocations, where K
 is the depth of the stack at the time of the await.  This is really unfortunate. 
 -->
-在Midori中，一个异步方法调用另一个异常方法是非常常见的，它调用了另一个...依此类推。 如果考虑状态机模型中发生的情况，则阻塞的叶子方法会触发级联的O（K）分配，其中K是等待时堆栈的深度。 这真的很不幸。
+在Midori中，一个async方法被另一个async方法所调用是非常常见的，
+同时它也可能调用了另一个async方法……依此类推。 
+如果考虑状态机模型中所发生的情况，则阻塞的叶子方法会触发级联的O(K)分配，
+其中K是await发生时堆栈的深度。 
+这将是非常不走运的情况。
 
 <!-- 
 What we ended up with was a model that only allocated when the await happened, and that allocated only once for an
 entire such chain of calls.  We called this chain an "activity."  The top-most `async` demarcated the boundary of an
 activity.  As a result, `async` could cost something, but `await` was free. 
 -->
-我们最终得到的是一个只在await发生时分配的模型，并且只为整个这样的调用链分配了一次。 我们将此链称为“活动”。最顶层的异步划分了活动的边界。 因此，异步可能会花费一些东西，但等待是免费的。
+我们最终采用的是一个只在await发生时分配的模型，
+并且只为整个如此的调用链分配了一次，我们将此链称为“activity”。
+最顶层的`async`划分了activity的边界。 
+因此，`async`可能会产生一些开销，但`await`却是零开销的。
 
 <!-- 
 Well, that required one additional step.  And this one was the biggie. 
 -->
-那么，这需要一个额外的步骤。 而这一个是最重要的。
+因此，这需要一个额外的步骤。 而这一点却是最重要的。
 
 <!-- 
 The final key optimization was to ensure that async methods imposed as little penalty as possible.  This meant
 eliminating a few sub-optimal aspects of the state machine rewrite model.  Actually, we abandoned it: 
 -->
-最后的关键优化是确保异步方法尽可能减少惩罚。 
-这意味着消除了状态机重写模型的一些次优方面。 实际上，我们放弃了它：
+最终的关键优化是确保异async方法尽可能地减小开销， 
+这意味着它将消除了状态机重写模型的一些不太理想的方面。 
+但是在实际上，我们最终弃用了它，其原因在于：
 
 <!-- 
 1. It completely destroyed code quality.  It impeded simple optimizations like inlining, because few inliners consider
    a switch statement with multiple state variables, plus a heap-allocated display frame, with lots of local variable
    copying, to be a "simple method."  We were competing with OS's written in native code, so this matters a lot. 
 -->
-1. 它完全破坏了代码质量。 它阻碍了像内联这样的简单优化，因为很少内联者认为带有多个状态变量的switch语句加上堆分配的显示框架（带有大量的局部变量复制）是一个“简单的方法”。我们正在与用本机编写的OS进行竞争。 代码，所以这很重要。
+1. 它完全破坏了代码质量。 
+   它阻碍了像内联这样的简单优化，因为很少有内联者认为，
+   带有多个状态变量的switch语句，
+   再加上堆分配的显示框架（带有大量局部变量的复制）是一个“简单的方法”。
+   由于我们正与用使用原生代码编写的OS进行竞争，因此这一点很重要。
 <!-- 
-2. It required changes to the calling convention.  Namely, returns had to be `Async*<T>` objects, much like .NET's
+1. It required changes to the calling convention.  Namely, returns had to be `Async*<T>` objects, much like .NET's
    `Task<T>`.  This was a non-starter.  Even though ours were structs -- eliminating the allocation aspect -- they were
    multi-words, and required that code fetch out the values with state and type testing.  If my async method returns
    an int, I want the generated machine code to be a method that returns an int, goddamnit. 
 -->
-2. 它需要更改调用约定。 也就是说，返回必须是Async * <T>对象，就像.NET的Task <T>一样。 这是一个非首发。 即使我们的结构 - 消除了分配方面 - 它们是多字的，并且要求代码通过状态和类型测试来获取值。 如果我的异步方法返回一个int，我希望生成的机器代码是一个返回int，goddamnit的方法。
+2. 它需调用约定进行修改。
+   也就是说，返回的必须是`Async*<T>`对象，就像.Net的`Task<T>`一样。 
+   这是一个非首发。 即使我们的结构——消除了分配方面——它们是多字的，并且要求代码通过状态和类型测试来获取值。 如果我的异步方法返回一个int，我希望生成的机器代码是一个返回int，goddamnit的方法。
    
 <!-- 
-3. Finally, it was common for too much heap state to get captured.  We wanted the total space consumed by an awaiting
+1. Finally, it was common for too much heap state to get captured.  We wanted the total space consumed by an awaiting
    activity to be as small as possible.  It was common for some processes to end up with hundreds or thousands of them,
    in addition to some processes constantly switching between them.  For footprint and cache reasons, it was important
    that they remain as small as the most carefully hand-crafted state machine as possible. 
 -->
-3. 最后，捕获的堆状态过多是很常见的。 我们希望等待活动所消耗的总空间尽可能小。 除了在它们之间不断切换的一些过程之外，一些过程通常最终会有数百或数千个过程。 出于占用空间和高速缓存的原因，重要的是它们尽可能小到最精心手工制作的状态机。
+3. 最后，捕获的堆状态过多是很常见的。 
+我们希望await活动所消耗的总空间尽可能小。 
+除了在它们之间不断切换的一些进程之外，
+一些进程通常最终会有数百或数千个轻量级进程。 
+出于占用空间和高速缓存的原因，
+它们作为人工精心编写的状态机保持越小越好，
+这一点非常重要。
 
 <!-- 
 The model we built was one where asynchronous activities ran on [linked stacks](https://gcc.gnu.org/wiki/SplitStacks).
@@ -674,7 +720,17 @@ a function call within a loop, however most of the above optimizations prevented
 they did, our linking code was hand-crafted assembly -- IIRC, it was three instructions to link -- and we kept a
 lookaside of hot link segments we could reuse. 
 -->
-我们构建的模型是异步活动在[链接堆栈](https://gcc.gnu.org/wiki/SplitStacks)上运行的模型。 这些链接可以从128字节开始，并根据需要增长。 经过多次实验，我们进入了一个模型，每次链接大小加倍; 因此，第一个链接将是128b，然后是256b，...，最多8k块。 实现这需要深度编译器支持。 正如它让它表现良好。 编译器知道提升链接检查，特别是在循环之外，并且当它可以预测堆栈帧的大小时会探测更大的数量（考虑内联）。 链接存在一个常见问题，即最终可能会频繁地重新链接，尤其是在循环内函数调用的边缘，但是上述大多数优化都会阻止它出现。 而且，即使他们这样做了，我们的链接代码也是手工制作的程序集--IIRC，它是三个链接指令 - 我们一直关注我们可以重用的热链接段。
+我们构建的模型是异步活动在[链接堆栈](https://gcc.gnu.org/wiki/SplitStacks)上运行的模型。 
+这些链接可以从128字节开始，并根据需要进行增长。 
+经过多次实验，我们采用了一个每次链接大小加倍的模型：
+也就是说，首个链接大小是128b，然后是256b，...，最大的块大小为8k。 
+对此的实现需要深度编译器支持，它也确实表现的良好。 
+编译器知道何时进行链接检查，特别是在循环之外，并且当它可以预测堆栈帧的大小时会探测更大的数量（考虑到内联）。 
+链接存在一个常见问题，即最终可能会频繁地进行重新链接，
+尤其是在循环内函数调用的边缘处，但是上述的大多数优化都将阻止这种情况的出现。 
+而且，即使这种情况发生了，我们的链接代码也是人工编写的汇编
+——IIRC，它是用于链接的三个指令——
+我们一直关注我们可以重用的热链接段。
 
 <!-- 
 There was another key innovation.  Remember, I hinted earlier, we knew statically in the type system whether a function
@@ -686,7 +742,17 @@ didn't have O(T) stacks, where T is the number of threads active in the entire s
 where P is the number of processors on the machine.  Remember, eliminating demand paging was also key to achieiving this
 outcome.  So it was really a bunch of "big bets" that added up to something that was seriously game-changing. 
 -->
-还有另一项重要创新。 记住，我之前暗示过，我们在类型系统中静态地知道函数是否是异步的，只是存在async关键字？ 这使我们能够在编译器中执行经典堆栈上的所有非异步代码。 最终结果是所有同步代码都保持无探针！ 另一个结果是OS内核可以在一组池化堆栈上调度所有同步代码。 它们总是很热，类似于经典的线程池，而不仅仅是OS调度程序。 因为它们从未被阻塞，所以没有O（T）堆栈，其中T是整个系统中活动的线程数。 相反，你最终得到O（P），其中P是机器上的处理器数量。 请记住，消除需求分页也是实现这一结果的关键。 所以这真的是一堆“大赌注”，加起来是一个严重改变游戏规则的东西。
+除此之外，还有其他的重要创新。 
+请记住，我之前曾暗示过，仅通过`async`关键字可以判断，
+可在类型系统中静态地知道函数是否是异步的。
+这使我们能够在编译器中执行经典堆栈上的所有非异步代码。 
+最终结果是所有同步代码都保持无探针！ 另一个结果是OS内核可
+以在一组堆栈池中调度所有同步代码。 
+它们总是处于热代码状态，类似于经典的线程池，而不仅仅是OS调度程序。
+因为它们从未被阻塞，所以没有O(T)的堆栈，其中T是整个系统中活跃的线程数。 
+相反，你最终得到O(P)，其中P是机器上的处理器数量。 
+请记住，消除按需分页也是实现这一结果的关键。 
+所以这真的是一堆“大赌注”，所有的加起来足以是形成革命性的成果。
 
 <!-- 
 ## Message Passing 
