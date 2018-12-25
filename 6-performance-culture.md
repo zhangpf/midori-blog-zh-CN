@@ -15,7 +15,17 @@ team operates from the start, and are able to proactively deliver loveable custo
 competition.  There's no easy cookie-cutter recipe for achieving a good performance culture, however there are certainly
 some best practices you can follow to plant the requisite seeds into your team.  So, let's go! 
 -->
-在这篇文章中，我将谈论“绩效文化”。绩效是软件工程的关键支柱之一，并且难以做到，有时甚至难以识别。 正如一位着名的法官曾经说过的那样，“当我看到它时，我就知道了。”我之前已经详细地谈过了表演和文化，但两者之间的关系是事情变得有趣。 能够做到这一点的团队的绩效几乎贯穿于团队从一开始就如何运作的各个方面，并且能够主动提供可以摧毁竞争对手的可爱的客户体验。 没有简单的千篇一律的方法来实现良好的绩效文化，但是你可以遵循一些最佳实践来将必要的种子植入你的团队。 那么，我们走吧！
+在本文中，我将谈谈“关于性能的文化”。
+性能是软件工程的关键支柱之一，并且难以做到，有时甚至难以识别。 
+正如一位著名的法官曾经说过的那样，“当我看到它时，我就知道了（I know it when I see it）”。
+我之前已经详细地谈过了性能和文化，
+但两者之间的交互才是使事情变得有趣的地方。 
+能够做到这一点的团队的性能几乎贯穿于团队，
+并且从一开始就如何运作的各个方面，
+并且能够主动提供可以摧毁竞争对手的良好客户体验。 
+没有千篇一律的简单方法来获得良好的性能文化，
+但是你依然可以遵循一些最佳实践来将必要的种子植入到团队中。 
+因此，让我们一起出发吧！
 
 <!-- 
 # Introduction 
@@ -25,7 +35,7 @@ some best practices you can follow to plant the requisite seeds into your team. 
 <!-- 
 Why the big focus on performance, anyway? 
 -->
-无论如何，为什么要关注性能呢？
+那么到底为什么要关注于性能？
 
 <!-- 
 Partly it's my background.  I've worked on systems, runtimes, compilers, ... things that customers expect to be fast.
@@ -33,7 +43,13 @@ It's always much easier to incorporate goals, metrics, and team processes at the
 attempting to recover it later on.  I've also worked on many teams, some that have done amazing at this, some that have
 done terribly, and many in between.  The one universal truth is that the differentiating factor is always culture. 
 -->
-部分是我的背景。 我曾经研究过系统，运行时，编译器......客户期望快速发展的东西。 与尝试稍后恢复它相比，在这样的项目开始时整合目标，指标和团队流程总是容易得多。 我也曾参与很多团队的工作，有些团队在这方面做得很棒，有些团队做得非常糟糕，而且很多团队介于两者之间。 一个普遍的事实是，差异化因素始终是文化。
+其中部分原因是由于我的背景。 
+我曾经研究过系统、运行时、编译器……这些都是客户期望运行的够快的软件。 
+在这样的项目中，与其在事后进行弥补相比，
+在开始时就整合目标，指标和团队的流程总是容易得多。 
+我也曾参与过很多团队的工作，有些团队在这方面做得很棒，
+有些团队却做得非常糟糕，而很多团队则介于两者之间。
+一个普遍的事实是，造成这之间差异的因素始终是文化。
 
 <!-- 
 Partly it's because, no matter the kind of software, performance is almost always worse than our customers would like
@@ -43,7 +59,15 @@ way less attention to developing a rigorous performance culture.  I've heard the
 us" statement many times only to later be canceled out by a painful realization that without it the product won't
 succeed. 
 -->
-部分是我的背景。 我曾经研究过系统，运行时，编译器......客户期望快速发展的东西。 与尝试稍后恢复它相比，在这样的项目开始时整合目标，指标和团队流程总是容易得多。 我也曾参与很多团队的工作，有些团队在这方面做得很棒，有些团队做得非常糟糕，而且很多团队介于两者之间。 一个普遍的事实是，差异化因素始终是文化。
+另外部分原因是，无论哪种软件，
+性能几乎总是比我们的客户所期望的要更差。 
+这是一个简单的物理问题：
+在给定有限时间以及在大小速度和功能之间进行折衷的情况下，
+不可能在所有方面加快程序的运行。 
+但我坚信，平均而言，团队花费较少的注意力来发展严谨的性能文化。 
+我已经很多次听说过这样的言论——“性能不是我们的首要任务”，
+而后来却又痛苦地意识到它的重要性，
+没有性能，产品就不会成功。
 
 <!-- 
 And partly it's just been top of mind for all of us in DevDiv, as we focus on .NET core performance, ASP.NET
@@ -51,7 +75,12 @@ scalability, integrating performance-motivated features into C# and the librarie
 more.  It's particularly top of mind for me, as I've been comparing our experiences to my own in [Midori](
 /2015/11/03/blogging-about-midori/) (which heavily inspired this blog post). 
 -->
-部分它只是DevDiv中我们所有人的头脑，因为我们专注于.NET核心性能，ASP.NET可扩展性，将性能驱动的功能集成到C＃和库中，使Visual Studio更快，等等。 这对我来说尤其重要，因为我一直在将我们的经历与我在Midori中的经历进行比较（这对博客文章有很大启发）。
+剩下的部分原因是，对于DevDiv团队而言，它是我们所有人摆在首位的，
+由于我们专注于.Net的核心性能，ASP.Net的扩展性，
+将性能驱动的功能集成到C#和库中，使Visual Studio变得更快等等。 
+这对我来说尤其重要，因为我一直在将我们的经历与
+我在[Midori](/2018/10/20/midori/0-blogging-about-midori/)
+中的经历进行比较（本文也因此受到很大启发）。
 
 <!-- 
 # Diagnosis and The Cure 
@@ -61,7 +90,7 @@ more.  It's particularly top of mind for me, as I've been comparing our experien
 <!-- 
 How can you tell whether your performance culture is on track?  Well, here are some signs that it's not: 
 -->
-您如何判断您的表现文化是否走上正轨？ 好吧，这里有一些迹象表明它不是：
+如何判断关于性能的文化是否走上正轨？ 好吧，这里有一些迹象表明它不是：
 
 <!-- 
 * Answering the question, "how is the product doing on my key performance metrics," is difficult.
@@ -81,7 +110,8 @@ How can you tell whether your performance culture is on track?  Well, here are s
 <!-- 
 These may sound like technical problems.  It may come as a surprise, however, that they are primarily human problems. 
 -->
-这听起来像技术问题。 然而，令人惊讶的是，它们主要是人类的问题。
+这些听起来像是技术问题。 
+然而，出乎意料之外的是，它们主要是人的问题。
 
 <!-- 
 The solution isn't easy, especially once your culture is in the weeds.  It's always easier to not dig a hole in the
@@ -91,22 +121,36 @@ seeking insights, demanding rigor -- while it simultaneously comes from the bott
 understand performance of the code they are writing, ruthlessly taking a zero-tolerance stance on regressions, and
 being ever-self-critical and on the lookout for proactive improvements. 
 -->
-解决方案并不容易，特别是一旦你的文化在杂草中。在第一个地方挖洞并不比以后爬出洞更容易。但是当你陷入困境时，第一条规则就是停止挖掘！文化转型必须从最高层开始 - 管理层在绩效中发挥积极作用，提出问题，寻求洞察力，要求严谨 - 同时从底层开始 - 工程师积极寻求理解他们正在编写的代码的表现，无情地采取对回归的零容忍态度，以及对自我批评和寻求主动改进的态度。
+对于此的解决方法并不容易，特别是一旦当你的文化在杂草中。
+从一开始就不挖坑始终比之后从坑里爬出来要容易。
+但是当你陷入困境时，首要的原则就是停止挖坑！
+文化的转型必须从最高层就开始
+——管理层需要在性能的提升中发挥积极作用，提出问题，寻找方法，严谨要求
+——同时从底层开始，工程师积极寻求理解他们正在编写的代码的性能，
+对性能退化采取无情的零容忍态度，以及对自我批评和寻求进行主动改进的态度。
 
 <!-- 
 This essay will describe some ways to ensure this sort of a culture, in addition to some best practices I've found help
 to increase its effectiveness once you have one in place.  A lot of it may seem obvious, but believe me, it's pretty
 rare to see everything in here working in harmony in practice.  But when it is, wow, what a difference it can make. 
 -->
-本文将介绍一些确保这种文化的方法，此外还有一些我发现有助于提高效率的最佳实践。很多事情看起来很明显，但相信我，很难看到这里的一切都在实践中协调一致。但是，当它是，哇，它可以做出什么样的不同。
+本文将介绍一些确保这种文化的方法，
+此外还有一些我发现的有助于提高效率的最佳实践。
+很多事情看起来很明显，但请相信我，在实践中很难看到所有一切都协调一致的进行。
+但是，如果一旦这样的文化得以建立，那它将产生巨大的影响力。
 
 <!-- 
 *A quick note on OSS software.  I wrote this essay from the perspective of commercial software development.  As
 such, you'll see the word "management" a lot.  Many of the same principles work in OSS too.  So, if you like, anytime
 you see "management," mentally transform it into "management or the project's committers."* 
 -->
-关于OSS软件的快速说明。我从商业软件开发的角度写了这篇文章。因此，你会看到很多“管理”这个词。许多相同的原则也适用于OSS。因此，如果您愿意，只要您看到“管理”，就会将其精神转化为“管理层或项目的提交者”。
-
+* 
+对于OSS软件的快速说明。我从商业软件开发的角度写了这篇文章。
+因此，你会看到很多“管理层”这个词。
+不过许多相同的原则也同样适用于OSS。
+因此，如果你愿意，只要你看到“管理层”二字，
+可以在脑海中转化为“管理层或项目的提交者”。
+*
 <!-- 
 # It Starts, and Ends, with Culture 
 -->
