@@ -90,7 +90,8 @@ more.  It's particularly top of mind for me, as I've been comparing our experien
 <!-- 
 How can you tell whether your performance culture is on track?  Well, here are some signs that it's not: 
 -->
-如何判断关于性能的文化是否走上正轨？ 好吧，这里有一些迹象表明它不是：
+如何判断关于性能的文化是否走上正轨？ 
+好吧，如果存在下面一些迹象，则表面它不是：
 
 <!-- 
 * Answering the question, "how is the product doing on my key performance metrics," is difficult.
@@ -100,17 +101,17 @@ How can you tell whether your performance culture is on track?  Well, here are s
 * Performance is something one, or a few, individuals are meant to keep an eye on, instead of the whole team.
 * Performance issues in production are common, and require ugly scrambles to address (and/or cannot be reproduced). 
 -->
-* 回答这个问题，“产品对我的关键绩效指标的影响如何”很难。
-* 绩效经常下降，团队成员要么不知道，要么不关心，要么发现行动太迟。
-* 责备是对性能问题（人员，基础设施或两者）最常见的响应之一。
-* 性能测试大幅度下降，无法信任，并且通常被大多数团队忽略。
-* 表演是一个或几个人应该关注的事情，而不是整个团队。
-* 生产中的性能问题是常见的，并且需要难以解决的争用（和/或不能再现）。
+* 回答“产品对我的关键性能指标是如何影响的”这个问题很难。
+* 性能经常退化，团队成员要么不知道，要么不关心，要么发现太晚难以行动。
+* 责备是对性能问题（人员，基础设施或两者皆有）的最常见反应之一。
+* 性能测试大幅度摇摆不定，无法确信，并且通常被大多数团队所忽略。
+* 性能是一个或几个人应该关注的事情，而不是整个团队。
+* 产品常常出现性能问题，并且需要难以解决的争用（和/或不能再现）。
 
 <!-- 
 These may sound like technical problems.  It may come as a surprise, however, that they are primarily human problems. 
 -->
-这些听起来像是技术问题。 
+这些咋听起来像是技术问题。 
 然而，出乎意料之外的是，它们主要是人的问题。
 
 <!-- 
@@ -121,7 +122,7 @@ seeking insights, demanding rigor -- while it simultaneously comes from the bott
 understand performance of the code they are writing, ruthlessly taking a zero-tolerance stance on regressions, and
 being ever-self-critical and on the lookout for proactive improvements. 
 -->
-对于此的解决方法并不容易，特别是一旦当你的文化在杂草中。
+对此的解决方法并不容易，特别是一旦当你的文化处在杂草中时候。
 从一开始就不挖坑始终比之后从坑里爬出来要容易。
 但是当你陷入困境时，首要的原则就是停止挖坑！
 文化的转型必须从最高层就开始
