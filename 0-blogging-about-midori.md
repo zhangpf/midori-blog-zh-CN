@@ -82,10 +82,10 @@ may help to recitify some of this.
 
 1. [三类安全性的故事](/2018/10/24/midori/1-a-tale-of-three-safeties/)
 2. [对象即安全权能](/2018/11/18/midori/2-objects-as-secure-capabilities/)
-3. 一切皆异步
+3. [一切皆异步](/2018/11/25/midori/3-asynchronous-everything/)
 4. 安全的原生代码
 5. 错误处理模型
-6. 性能的文化
+6. 关于性能的文化
 7. 关于并发的15年
 
 <!-- 

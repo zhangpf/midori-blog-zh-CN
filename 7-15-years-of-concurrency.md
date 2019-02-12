@@ -12,7 +12,11 @@ place, having spent years on .NET and C++ concurrency models leading up to joini
 I'm very proud of during this time.  Perhaps more broadly interesting, however, are the reflections on this experience
 after a few years away from the project. 
 -->
-在三个安全的故事中，我们讨论了三种安全性：类型，内存和并发。 在这篇后续文章中，我们将深入探讨最后一篇，也许是最新颖而又最难的一篇。 并发安全使我首先进入Midori项目，花了数年时间在.NET和C ++并发模型上加入。 我们建造了一些我非常自豪的伟大事物。 然而，更广泛的有趣的是，在离开项目几年后，对这种体验的反思。
+在[三类安全性的故事](/2018/10/24/midori/1-a-tale-of-three-safeties/)中，我们讨论了三种安全性：类型安全，内存安全和并发安全。 
+在后续的本文中，我们将深入探讨最后一种安全性——并发安全，这也许是其中最新颖也最难的一种。
+对并发安全的追求是使我最初参与到Midori项目的原因之一，因为在此之前的数年时间在.NET和C++并发模型上加入。 
+在参与Midori的过程中，我们打造了一些我引以为傲的伟大事物。 
+然而，更具有广泛兴趣的是，在离开项目数年时间里，对这段经历的不断反思。
 
 <!-- 
 I've tried to write this article about 6 times since earlier this year, and I'm thrilled to finally share it.  I hope
@@ -20,7 +24,10 @@ that it's useful to anyone interested in the field, and especially anybody who i
 Although the code samples and lessons learned are deeply rooted in C#, .NET, and the Midori project, I have tried to
 generalize the ideas so they are easily consumable regardless of programming language.  I hope you enjoy! 
 -->
-自今年早些时候以来，我已经尝试过写这篇文章大约6次了，我很高兴最终分享它。 我希望它对任何对该领域感兴趣的人都有用，尤其是那些在这一领域积极创新的人。 虽然代码示例和经验教训深深植根于C＃，.NET和Midori项目，但我试图概括这些想法，因此无论编程语言如何，它们都很容易被消费。 我希望你喜欢！
+自今年早些时候以来，我已大约6次尝试写这篇文章，并且我很高兴最终能将它分享出去。 
+我希望它对任何对该领域感兴趣的人都有用，尤其是那些在这一领域积极创新的人。 
+虽然示例代码和经验教训都深深根植于C#，.Net和Midori项目，但我试图概括这些想法，因此无论你使用何种编程语言，都将很容易理解它们。 
+我希望你能喜欢！
 
 <!-- 
 # Background 
@@ -31,12 +38,13 @@ generalize the ideas so they are easily consumable regardless of programming lan
 For most of the 2000s, my job was figuring out how to get concurrency into the hands of developers, starting out as a
 relatively niche job on [the CLR team](https://en.wikipedia.org/wiki/Common_Language_Runtime) at Microsoft. 
 -->
-在2000年代的大部分时间里，我的工作是弄清楚如何将并发性交给开发人员，最初是作为微软CLR团队的一个相对小众的工作。
+在2000年代的大部分时间里，我的工作是弄清楚如何
+将并发性提供给开发人员，并最初作为微软[CLR团队](https://en.wikipedia.org/wiki/Common_Language_Runtime)的一个相对小众的工作而进行开展。
 
 <!-- 
 ## Niche Beginnings 
 -->
-## 利基起点
+## 起点
 <!-- 
 Back then, this largely entailed building better versions of the classic threading, locking, and synchronization
 primitives, along with attempts to solidify best practices.  For example, we introduced a thread-pool to .NET 1.1,
@@ -48,12 +56,17 @@ experimented with [static analysis](
 https://www.microsoft.com/en-us/research/wp-content/uploads/2008/08/tr-2008-108.pdf).  I even [wrote a book](
 https://www.amazon.com/Concurrent-Programming-Windows-Joe-Duffy/dp/032143482X) about it. 
 -->
-那时候，这主要需要构建更好的经典线程，锁定和同步原语版本，以及巩固最佳实践的尝试。 例如，我们向.NET 1.1引入了一个线程池，并利用这种经验来提高Windows内核，调度程序和自己的线程池的可伸缩性。 我们拥有这台疯狂的128处理器NUMA机器，让我们忙于各种深奥的性能挑战。 我们制定了如何进行并发权利的规则 - 锁定平衡等等 - 并进行了静态分析的实验。 我甚至写了一本关于它的书。
+在当时，主要涉及的工作包括构建更好版本的经典线程、加锁和同步原语，以及巩固最佳实践的尝试。
+例如，我们向.Net 1.1版本中引入了线程池，并利用这种经验来提高Windows内核、调度器和线程池的可伸缩性。 
+我们所拥有的那台疯狂的128核的[NUMA](https://en.wikipedia.org/wiki/Non-uniform_memory_access)机器，使得我们忙于各种深奥的性能挑战中。 
+我们制定了[如何正确进行并发](http://joeduffyblog.com/2006/10/26/concurrency-and-the-impact-on-reusable-libraries/)的规则——加锁平衡等等，并进行了[静态分析](https://www.microsoft.com/en-us/research/wp-content/uploads/2008/08/tr-2008-108.pdf)的实验。 
+为此，我甚至写了一本[关于并发的书](
+https://www.amazon.com/Concurrent-Programming-Windows-Joe-Duffy/dp/032143482X)。
 
 <!-- 
 Why concurrency in the first place? 
 -->
-为什么首先要并发？
+为什么要把并发放到首位？
 
 <!-- 
 In short, it was enormously challenging, technically-speaking, and therefore boatloads of fun. 
@@ -68,15 +81,17 @@ https://en.wikipedia.org/wiki/NESL)), advanced type systems, and even specialize
 https://en.wikipedia.org/wiki/MIMD) supercomputers, that innovated beyond our trustworthy pal, [von Neumann](
 https://en.wikipedia.org/wiki/Von_Neumann_architecture)). 
 -->
-我一直是一个语言奇怪。因此，我自然着迷于学术界数十年的深入研究，包括编程语言和运行时共生（特别是Cilk和NESL），高级类型系统，甚至是专门的并行硬件架构（尤其是像Connection Machine和MIMD超级计算机这样的激进架构） ，创新超越我们值得信赖的伙伴冯诺依曼。
+我一直是编程语言爱好者。因此，我自然而然地着迷于学术界数十年的深入研究，
+这包括编程语言、运行时共生（特别是[Cilk](https://en.wikipedia.org/wiki/Cilk)和[NESL](https://en.wikipedia.org/wiki/NESL)）
+、高级类型系统、甚至是专门的并行硬件架构（尤其是像[Connection Machine](https://en.wikipedia.org/wiki/Connection_Machine)和[MIMD](https://en.wikipedia.org/wiki/MIMD)超级计算机这样的激进体系结构），它们甚至突破了我们值得信赖的[冯·诺依曼体系结构](https://en.wikipedia.org/wiki/Von_Neumann_architecture)。
 
 <!-- 
 Although some very large customers actually ran [symmetric multiprocessor (SMP)](
-https://en.wikipedia.org/wiki/Symmetric_multiprocessing) servers -- yes, we actually used to call them that -- I
+https://en.wikipedia.org/wiki/Von_Neumann_architecture) servers -- yes, we actually used to call them that -- I
 wouldn't say that concurrency was a very popular area to specialize in.  And certainly any mention of those cool
 "researchy" sources would have gotten an odd glance from my peers and managers.  Nevertheless, I kept at it. 
 -->
-虽然一些非常大的客户实际上运行了对称多处理器（SMP）服务器 - 是的，我们实际上习惯称之为 - 我不会说并发性是一个非常受欢迎的专业领域。当然，任何提及那些很酷的“研究”消息来源可能会让我的同行和经理们一目了然。尽管如此，我仍然坚持下去。
+虽然一些非常大的客户实际上使用的是[对称多处理器（SMP）](https://en.wikipedia.org/wiki/Von_Neumann_architecture) 服务器 - 是的，我们实际上习惯称之为 - 我不会说并发性是一个非常受欢迎的专业领域。当然，任何提及那些很酷的“研究”消息来源可能会让我的同行和经理们一目了然。尽管如此，我仍然坚持下去。
 
 <!-- 
 Despite having fun, I wouldn't say the work we did during this period was immensely impactful to the casual observer.
@@ -84,12 +99,12 @@ We raised the abstractions a little bit -- so that developers could schedule log
 levels of synchronization, and so on -- but nothing game-changing.  Nonetheless, this period was instrumental to laying
 the foundation, both technically and socially, for what was to come later on, although I didn't know it at the time. 
 -->
-尽管玩得很开心，但我不会说在此期间我们所做的工作对于不经意的观察者来说是非常有影响力的。我们稍微提出了抽象 - 这样开发人员可以安排逻辑工作项，考虑更高级别的同步等等 - 但没有改变游戏规则。尽管如此，这个时期对于在技术上和社会上为后来的事情奠定基础是有帮助的，尽管我当时并不知道。
+尽管这很有趣，但我不会说在此期间我们所做的工作对于不经意的观察者来说是非常有影响力的。我们稍微提出了抽象 - 这样开发人员可以安排逻辑工作项，考虑更高级别的同步等等 - 但没有改变游戏规则。尽管如此，这个时期对于在技术上和社会上为后来的事情奠定基础是有帮助的，尽管我当时并不知道。
 
 <!-- 
 ## No More Free Lunch; Enter Multicore 
 -->
-## 没有更多免费午餐;输入多核
+## 没有免费的午餐——进入多核领域
 
 <!-- 
 Then something big happened. 
@@ -103,7 +118,10 @@ challenges](https://www.quora.com/Why-havent-CPU-clock-speeds-increased-in-the-l
 the ever-increasing year-over-year clock speed improvements](
 http://www.economist.com/technology-quarterly/2016-03-12/after-moores-law) that the industry had grown accustomed to. 
 -->
-2004年，英特尔和AMD向我们介绍了摩尔定律，特别是它即将消亡。电源墙的挑战将严重限制该行业已经习惯的不断增加的同比时钟速度改进。
+2004年，英特尔和AMD向我们介绍了[摩尔定律](https://en.wikipedia.org/wiki/Moore's_law)，
+特别是它[即将消亡](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.87.8775&rep=rep1&type=pdf)的事实。
+[能量墙的挑战](https://www.quora.com/Why-havent-CPU-clock-speeds-increased-in-the-last-5-years)将[严重限制该行业已经习惯的逐年增加时钟速度的改进方式](
+http://www.economist.com/technology-quarterly/2016-03-12/after-moores-law) 。
 
 <!-- 
 Suddenly management cared a whole lot more about concurrency.  Herb Sutter's 2005 ["Free Lunch is Over" article](
@@ -115,12 +133,19 @@ people would have less reason to buy new hardware and software.  An end to the [
 https://en.wikipedia.org/wiki/Wintel) and [Andy and Bill's Law](
 http://www.forbes.com/2005/04/19/cz_rk_0419karlgaard.html), *"What Andy giveth, Bill taketh away"*. 
 -->
-突然之间，管理层更加关注并发性。 Herb Sutter的2005年“免费午餐结束”文章捕获了发烧的声音。如果我们无法使开发人员能够编写大规模并行软件 - 这在历史上非常困难并且不会在没有明显降低进入门槛的情况下发生 - 微软和英特尔的业务以及互利的商业模式都遇到了麻烦。如果硬件没有以通常的方式变得更快，软件就不会自动变得更好，而人们没有理由购买新的硬件和软件。结束了温特尔时代和安迪和比尔的法则，“安迪给出了什么，比尔带走了”。
+因此，突然之间管理层更加关注于并发性。 
+Herb Sutter在2005年[“免费午餐已结束”的文章](http://www.gotw.ca/publications/concurrency-ddj.htm)捕捉到了这种发烧的声音。
+如果我们无法使开发人员能够编写大规模并行软件（由于历史原因，该任务非常困难，并且不会在没有明显降低进入门槛的情况下发生），
+那么微软和英特尔的业务以及其互利的商业模式都将遇到麻烦。
+如果硬件没有以通常的方式变得更快，那么软件就不会自动变得更好，
+因此人们没有理由再购买新的硬件和软件。
+这标志着[Wintel时代](https://en.wikipedia.org/wiki/Wintel)和[安迪-比尔法定律](
+http://www.forbes.com/2005/04/19/cz_rk_0419karlgaard.html)（*“凡是安迪提供的（计算资源），比尔全都带走”*）的结束。
 
 <!-- 
 Or, so the thinking went. 
 -->
-或者，思考就这样了。
+也就是说，这产生了思考。
 
 <!-- 
 This is when the term ["multicore"](https://en.wikipedia.org/wiki/Multi-core_processor) broke into the mainstream, and
@@ -129,7 +154,9 @@ https://en.wikipedia.org/wiki/Manycore_processor) that took a page from [DSP](
 https://en.wikipedia.org/wiki/Digital_signal_processor)s, mixing general purpose cores with specialized ones that
 could offload heavy-duty functions like encryption, compression, and the like. 
 -->
-这就是“多核”这个术语进入主流的时候，我们开始构想一个拥有1,024个核心处理器和更具前瞻性的“多核”架构的世界，这些架构从DSP中获取了一页，将通用核心与可卸载的专用核心混合在一起重载功能，如加密，压缩等。
+这就是[“多核”](https://en.wikipedia.org/wiki/Multi-core_processor)这个术语进入主流的时候。
+我们开始设想一个拥有1,024个处理器核心和更具前瞻性的，从[DSP](https://en.wikipedia.org/wiki/Digital_signal_processor)中获得启发的[“众核”架构](https://en.wikipedia.org/wiki/Manycore_processor)领域。
+这个领域通用处理核心与专用核心混合使用，以迁移计算密集型任务，例如加密，压缩等。
 
 <!-- 
 As an aside, with 10 years of hindsight, things didn't unfold exactly as we thought they would.  We don't run PCs with
@@ -138,7 +165,10 @@ http://www.geforce.com/hardware/10series/titan-x-pascal), and we do see more het
 in the data center where [FPGA](https://en.wikipedia.org/wiki/Field-programmable_gate_array)s are now [offloading
 critical tasks like encryption and compression](https://www.wired.com/2016/09/microsoft-bets-future-chip-reprogram-fly/). 
 -->
-顺便说一下，经过10年的回顾，事情并没有像我们想象的那样完全展开。我们没有运行具有1,024个传统内核的PC，尽管我们的GPU已经超过了这个数字，我们确实看到了比以往更多的异构性，特别是在FPGA正在卸载加密和压缩等关键任务的数据中心。
+顺便说一下，经过10年的回顾，事情并没有像我们想象的那样完全展开。
+我们未产生能够运行1,024个传统内核的PC，
+尽管[GPU中核心的数量已经超过了这个数字](http://www.geforce.com/hardware/10series/titan-x-pascal)，并且确实获得了比以往更多的异构性。
+特别是在数据中心中，[FPGA](https://en.wikipedia.org/wiki/Field-programmable_gate_array)正在[迁移加密和压缩等关键任务](https://www.wired.com/2016/09/microsoft-bets-future-chip-reprogram-fly/)的计算量。
 
 <!-- 
 The real big miss, in my opinion, was mobile.  This was precisely when the thinking around power curves, density, and
@@ -148,18 +178,25 @@ PC business.  This is a classical [innovator's dilemma](https://en.wikipedia.org
 it sure didn't seem like one at the time.  And of course PCs didn't die overnight, so the innovation here was not
 wasted, it just feels imbalanced against the backdrop of history.  Anyway, I digress. 
 -->
-在我看来，真正的重大缺失是移动性。这恰恰是围绕功率曲线，密度和异质性的思考应该告诉我们移动即将来临，并且在很大程度上。我们应该一直在寻找口袋里的电脑，而不是寻求更强大的电脑。相反，天生的本能是坚持过去并“拯救”PC业务。这是一个经典的创新者的困境，虽然它当时看起来不像一个。当然，PC并没有在一夜之间消失，所以这里的创新并没有浪费，只是在历史背景下感觉不平衡。无论如何，我离题了。
+在我看来，真正的重大缺失是在移动领域。
+这恰恰是围绕功率曲线、密度和异质性的思考，应该告诉我们移动即将来临，并在很大程度上来临。
+我们应更多地使用自己口袋中的PC设备，而不是寻求更强大的电脑。
+相反，一种天生的本能就是坚持过去并“拯救”传统PC业务，这是经典的[创新者的困境](https://en.wikipedia.org/wiki/The_Innovator's_Dilemma)，即使在当时看起来这并不是。
+当然，PC也并没有一夜之间消失，因此创新并没有浪费，只是在历史背景下感觉不平衡。
+不管怎样，我有点偏题了。
 
 <!-- 
 ## Making Concurrency Easier 
 -->
-## 使并发更容易
+## 使并发变得更容易
 
 <!-- 
 As a concurrency geek, this was the moment I was waiting for.  Almost overnight, finding sponsors for all this
 innovative work I had been dreaming about got a lot easier, because it now had a real, and very urgent, business need. 
 -->
-作为一个并发极客，这就是我等待的那一刻。 几乎在一夜之间，找到所有这些我梦寐以求的创新工作的赞助商变得更加容易，因为它现在有一个真正的，非常紧急的业务需求。
+作为一个并发的极客，这就是我期待的那一刻。 
+几乎在一夜之间，找到我所有梦寐以求的创新工作的赞助变得更加容易，
+因为它现在变成一个真实且非常紧急的业务需求。
 
 <!-- 
 In short, we needed to: 
@@ -171,19 +208,19 @@ In short, we needed to:
 * Make it easier to avoid concurrency pitfalls.
 * Make both of these things happen almost "by accident." 
 -->
-* 使编写并行代码更容易。
+* 使得编写并行代码变得更容易。
 * 更容易避免并发陷阱。
-* 让这两件事情几乎“偶然”发生。
+* 让前面两者的发生变得几乎成为“偶然”。
 
 <!-- 
 We already had threads, thread-pools, locks, and basic events.  Where to go from here? 
 -->
-我们已经有了线程，线程池，锁和基本事件。 然后去哪儿？
+我们已经有了线程、线程池、锁和基本的事件，那么然后呢？
 
 <!-- 
 Three specific projects were hatched around this point and got an infusion of interest and staffing. 
 -->
-围绕这一点设计了三个具体项目，并引起了兴趣和人员配备。
+围绕这一点，我们设计了三个具体项目，引起了相关人员的兴趣，并组建了团队。
 
 <!-- 
 ### Software Transactional Memory 
@@ -194,13 +231,14 @@ Three specific projects were hatched around this point and got an infusion of in
 Ironically, we began with safety first.  This foreshadows the later story, because in general, safety took a serious
 backseat until I was able to pick it back up in the context of Midori. 
 -->
-具有讽刺意味的是，我们首先开始安全 这预示着后来的故事，因为总的来说，安全性是一个严重的后座，直到我能够在Midori的背景下重新找回它。
+具有讽刺意味的是，我们首先以安全开始。这预示着后来的故事，因为总的来说，安全性是一个严重的后座，直到我能够在Midori的背景下重新找回它。
 
 <!-- 
 Developers already had several mechanisms for introducing concurrency, and yet struggled to write correct code.  So we
 sought out those higher level abstractions that could enable correctness as if by accident. 
 -->
-开发人员已经有几种引入并发的机制，但仍努力编写正确的代码。 因此，我们找到了那些能够正确实现正确性的更高级别的抽象。
+开发人员已经有几种引入并发的机制，但仍努力编写正确的代码。 
+因此，我们找到了那些能够正确实现具有正确性的更高级别的抽象。
 
 
 <!-- 
@@ -209,12 +247,12 @@ promising research had been coming out in the years since [Herlihy and Moss's se
 https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-895-theory-of-parallel-systems-sma-5509-fall-2003/readings/herlihy_mo93.pdf)
 and, although it wasn't a panacea, a number of us became enamored with its ability to raise the abstraction level. 
 -->
-输入软件事务内存（STM）。 自Herlihy和Moss的1993年开创性论文以来，已经出现了大量有前景的研究，虽然它不是灵丹妙药，但我们中的许多人都迷恋于其提高抽象水平的能力。
+回到[软件事务内存](https://en.wikipedia.org/wiki/Transactional_memory)（STM）上来，自Herlihy和Moss于1993年发表的开创性论文以来，已经出现了大量有前景的研究，虽然它不是灵丹妙药，但我们中的许多人都迷恋于其提高抽象水平的能力。
 
 <!-- 
 STM let you write things like this, and get automatic safety: 
 -->
-STM让你写这样的东西，并获得自动安全：
+STM让你写这样的东西，并自动获得安全性：
 
     void Transfer(Account from, Account to, int amt) {
         atomic {
@@ -227,21 +265,23 @@ STM让你写这样的东西，并获得自动安全：
 <!-- 
 Look ma, no locks! 
 -->
-看马，没锁！
+瞧瞧，这里没有上锁！
 
 <!-- 
 STM could handle all of the decisions transparently like figuring out how coarse- or fine-grained synchronization to
 use, the contention policies around that synchronization, deadlock detection and prevention, and guarantee that you
 didn't forget to lock when accessing a shared data structure.  All behind a tantalizingly simple keyword, `atomic`. 
 -->
-STM可以透明地处理所有决策，例如确定如何使用粗粒度或细粒度同步，围绕该同步的争用策略，死锁检测和防止，并保证在访问共享数据结构时您不会忘记锁定。所有这些都是一个诱人的简单关键字，原子。
+STM可以透明地处理所有决策，例如，确定如何使用粗粒度或细粒度同步，围绕该同步的竞争策略、死锁检测和避免，并保证在访问共享数据结构时不会忘记加锁，而完成所有这些都是一个吸引人得简单关键字——`atomic`。
 
 <!-- 
 STM also came with simple, more declarative, coordination mechanisms, like [orElse](
 https://hackage.haskell.org/package/stm-2.4.4.1/docs/Control-Monad-STM.html#v:orElse).  So, although the focus was on
 eliminating the need to manually manage locking, it also helped evolve synchronization between threads. 
 -->
-STM还带有简单的，更具声明性的协调机制，如orElse。因此，虽然重点是消除手动管理锁定的需要，但它也有助于发展线程之间的同步。
+STM还具有简单的，更具声明性的协调机制，
+如[`orElse`](https://hackage.haskell.org/package/stm-2.4.4.1/docs/Control-Monad-STM.html#v:orElse)。
+因此，虽然其初衷是消除手动加锁的负担，但它同时也有助于发展线程之间的同步。
 
 <!-- 
 Unfortunately, after a few years of prototyping deep runtime, OS, and even hardware support, we abandoned the efforts.
@@ -253,7 +293,8 @@ be the correct tool for the job once we got to that point.  (In hindsight, I do 
 reasonable tools in the toolbelt, although with more distributed application architectures on the rise, it's [a
 dangerous thing to give to people](http://wiki.c2.com/?DistributedTransactionsAreEvil).) 
 -->
-不幸的是，经过几年的深度运行时，操作系统甚至硬件支持的原型设计，我们放弃了努力。我的简要总结是，鼓励良好的并发体系结构比使穷人“正常工作”更重要，尽管我已经在这里和这里写了更多细节。正是这种更高层次的架构我们应该首先关注解决问题，并在尘埃落定之后，看看还有什么差距。一旦我们达到这一点，甚至还不清楚STM是否是正确的工具。 （事后看来，我确实认为它是工具带中许多合理的工具之一，尽管随着更多分布式应用程序架构的增加，给人们带来危险的事情。）
+不幸的是，经过几年对运行时，操作系统甚至硬件支持的深度原型设计，我们放弃了这种努力。
+对此，我的简要总结是，鼓励良好的并发体系结构比使在较差的硬件上“恰好够用”更重要，尽管我已经在这里和这里写了更多细节。正是这种更高层次的架构我们应该首先关注解决问题，并在尘埃落定之后，看看还有什么差距。一旦我们达到这一点，甚至还不清楚STM是否是正确的工具。 （事后看来，我确实认为它是工具带中许多合理的工具之一，尽管随着更多分布式应用程序架构的增加，给人们带来危险的事情。）
 
 <!-- 
 Our STM efforts weren't a complete failure, however.  It was during this time that I began experimenting with type
@@ -263,7 +304,12 @@ suite of instructions, delivering the capability to leverage [speculative lock e
 http://citeseer.ist.psu.edu/viewdoc/download;jsessionid=496F867855F76185B4C1EA3195D42F8C?doi=10.1.1.136.1312&rep=rep1&type=pdf)
 for ultra-cheap synchronization and locking operations.  And again, I worked with some amazing people during this time. 
 -->
-然而，我们的STM努力并非彻底失败。正是在这段时间里，我开始尝试使用类型系统来实现安全并发​​。此外，最终的零碎件作为事务同步扩展（TSX）指令集合并入英特尔的Haswell处理器，提供了利用推测性锁定省略实现超低成本同步和锁定操作的能力。而且，在这段时间里，我和一些了不起的人一起工作过。
+然而，我们在STM上的努力并非彻底失败。
+正是在这段时间里，我开始尝试使用类型系统来实现安全并发​​。
+此外，最终的零碎件作为[事务同步扩展（TSX）](https://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions)指令集合并入英特尔的Haswell处理器，
+以提供了利用[推断性锁省略](http://citeseer.ist.psu.edu/viewdoc/download;jsessionid=496F867855F76185B4C1EA3195D42F8C?doi=10.1.1.136.1312&rep=rep1&type=pdf)
+实现超低成本同步加锁操作的能力。
+并且，在这段时间里，我和一些非常厉害的人一起工作过。
 
 <!-- 
 ### Parallel Language Integrated Query (PLINQ) 
@@ -274,12 +320,13 @@ for ultra-cheap synchronization and locking operations.  And again, I worked wit
 Alongside STM, I'd been prototyping a "skunkworks" data parallel framework, on nights and weekends, to leverage our
 recent work in [Language Integrated Query (LINQ)](https://en.wikipedia.org/wiki/Language_Integrated_Query). 
 -->
-除了STM之外，我还在晚上和周末为“skunkworks”数据并行框架进行原型设计，以利用我们最近在语言集成查询（LINQ）方面的工作。
+除了STM之外，为了利用我们最近在[语言集成查询（LINQ）](https://en.wikipedia.org/wiki/Language_Integrated_Query)
+方面的成果，我还在晚上和周末对“skunkworks”数据并行框架进行原型设计。
 
 <!-- 
 The idea behind parallel LINQ (PLINQ) was to steal a page from three well-researched areas: 
 -->
-并行LINQ（PLINQ）背后的想法是从三个研究得很好的领域中窃取一页：
+并行LINQ（PLINQ）背后的想法分别从三个得到很好研究的领域中获得：
 
 
 <!-- 
@@ -296,16 +343,21 @@ The idea behind parallel LINQ (PLINQ) was to steal a page from three well-resear
 3. Data parallelism, which had quite a [lengthy history in academia](https://en.wikipedia.org/wiki/Data_parallelism)
    and even some more mainstream incarnations, most notably [OpenMP](https://en.wikipedia.org/wiki/OpenMP). 
 -->
-1. 并行数据库已经将用户行为的SQL查询并行化而无需了解它，通常会产生令人印象深刻的结果。
-2. 声明性和函数式语言，通常使用列表推导来表达可以积极优化的高级语言操作，包括并行性。为此，我加深了对Haskell的痴迷，并受到了APL的启发。
-3. 数据并行，在学术界甚至更为主流的化身中有相当长的历史，最着名的是OpenMP。
+1. [并行数据库](https://en.wikipedia.org/wiki/Parallel_database)：已经在[针对用户行为的SQL查询并行化](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.21.2197&rep=rep1&type=pdf)而无需了解细节方面，产生了令人印象深刻的结果；
+2. 声明性和函数式语言：通常使用[列表推导](   https://en.wikipedia.org/wiki/List_comprehension)的方式，
+来表达包括并行性在内的，可以积极优化的高级语言操作。
+为此，我加深了对[Haskell](https://wiki.haskell.org/GHC/Data_Parallel_Haskell)的执念，
+并从[APL](https://en.wikipedia.org/wiki/APL_(programming_language))中获得了启发。
+3. [数据并行](https://en.wikipedia.org/wiki/Data_parallelism)：
+在学术界甚至更为主流的化身中有相当长的历史，
+其中最著名的是[OpenMP](https://en.wikipedia.org/wiki/OpenMP)。
 
 <!-- 
 The idea was pretty straightforward.  Take existing LINQ queries, which already featured operations like maps, filters,
 and aggregations -- things that were classically parallelizable in both languages and databases -- and auto-parallelize
 them.  Well, it couldn't be implicit, because of side-effects.  But all it took was a little `AsParallel` to enable: 
 -->
-这个想法很简单。采用现有的LINQ查询，这些查询已经具有地图，过滤器和聚合等操作 - 在语言和数据库中可以经典地并行化的东西 - 并自动并行化它们。嗯，由于副作用，它不能隐含。但所有这一切都需要一点AsParallel才能实现：
+这样的想法很简单。采用现有的LINQ查询，这些查询已经具有地图，过滤器和聚合等操作 - 在语言和数据库中可以经典地并行化的东西 - 并自动并行化它们。嗯，由于副作用，它不能隐含。但所有这一切都需要一点`AsParallel`才能实现：
 
 <!-- 
     // Sequential:
@@ -333,7 +385,10 @@ This demonstrates one of the great things about data parallelism.  It can scale 
 data quantity, expense of the operations against that data, or both.  And when expressed in a sufficiently high-level
 language, like LINQ, a developer needn't worry about scheduling, picking the right number of tasks, or synchronization. 
 -->
-这展示了数据并行性的一大优点。它可以根据输入的大小进行扩展：数据数量，针对该数据的操作费用，或两者。当使用足够高级的语言（如LINQ）表示时，开发人员无需担心计划，选择正确数量的任务或同步。
+这展示了数据并行性的一大优点。
+它可以根据输入的大小进行扩展：数据量，针对该数据的操作费用，或两者。
+当使用足够高级的语言（如LINQ）表示时，
+开发人员无需担心计划，选择正确数量的任务或同步。
 
 <!-- 
 This is essentially [MapReduce](https://en.wikipedia.org/wiki/MapReduce), on a single machine, across many processors.
@@ -344,7 +399,12 @@ implementations.)  This eventually led to Microsoft's own internal equivalent to
 https://www.quora.com/Distributed-Systems-What-is-Microsofts-Cosmos), a system that powers a lot of big data innovation
 at Microsoft still to this date. 
 -->
-这本质上是MapReduce，在一台机器上，跨越许多处理器。实际上，我们后来与MSR就一个名为DryadLINQ的项目进行了合作，该项目不仅在许多处理器上运行此类查询，而且还将它们分布在许多机器上。 （最终我们使用SIMD和GPGPU实现更细粒度。）这最终导致微软自己的内部等同于谷歌的MapReduce，Cosmos，这个系统在微软仍然支持这一日期的大量数据创新。
+它在本质上是单个机器上跨越多个处理器的`MapReduce`(https://en.wikipedia.org/wiki/MapReduce)模型。
+实际上，我们后来与MSR就一个名为[DryadLINQ](https://www.microsoft.com/en-us/research/project/dryadlinq/)的项目进行了合作，
+该项目不仅可以在单个机器上的多个处理器上并行查询，
+而且还可以通过分布的方式在多个机器上并行（最终我们使用SIMD和GPGPU实现了更细粒度的控制）。
+这最终使得微软在自己的内部实现了等同于谷歌的MapReduce和[Cosmos](https://www.quora.com/Distributed-Systems-What-is-Microsofts-Cosmos)的系统，该系统至今仍在微软驱动着许多的大数据创新。
+
 <!-- 
 Developing PLINQ was a fond time in my career and a real turning point.  I collaborated and built relationships with
 some amazing people.  BillG wrote a full-page review of the idea, concluding with "We will have to put more resources
@@ -354,7 +414,12 @@ https://en.wikipedia.org/wiki/Jim_Gray_(computer_scientist)) took notice, and I 
 generosity 1st hand, just two months before his tragic disappearance. 
 -->
 
-发展PLINQ是我职业生涯中的一个美好时光，也是一个真正的转折点。我与一些了不起的人合作并建立了关系。 BillG写了一篇关于这个想法的整版评论，其结论是“我们将不得不在这项工作中专门投入更多资源。”这种强烈的鼓励措辞并没有因为获得资金来实现这一想法而受到伤害。它也引起了一些不可思议的人的注意。例如，吉姆格雷注意到了，在他悲惨失踪前两个月，我得到了他臭名昭着的慷慨。
+开发PLINQ是我职业生涯中的一段美好时光，并且也是一个真正的转折点。
+我与一些了不起的人合作并建立了关系。 
+Bill Gates写了一篇关于该想法的整版评论，并以“我们将专门为这项工作投入更多资源”作为结语。
+这样的鼓励措辞并没有因实现这一想法需进行秘密资助，其强烈程度而有所保留。
+另外，该项目也引起了一些特别的大佬的注意。
+例如，[Jim Gray](https://en.wikipedia.org/wiki/Jim_Gray_(computer_scientist))注意到了该项目，在他失踪悲剧发生前两个月，我得到了他广为人知的慷慨相助。
 
 <!-- 
 Needless to say, this was an exciting time! 
@@ -370,7 +435,9 @@ Needless to say, this was an exciting time!
 Around this time, I decided to broaden the scope of our efforts beyond just data parallelism, tackling task parallelism
 and other concurrency abstractions.  So I went around pitching the idea of forming a new team.
 -->
-大约在这个时候，我决定扩大我们的工作范围，而不仅仅是数据并行，处理任务并行和其他并发抽象。所以我开始提出组建新团队的想法。
+大约就在这个时候，我决定扩大我们的工作范围，
+而不仅仅只是数据并行，而应该包括任务处理并行和其他并发抽象。
+所以我开始提出组建新团队的想法。
 
 <!-- 
 Much to my surprise, a new parallel computing group was being created in the Developer Division in response to the
@@ -378,12 +445,14 @@ changing technology landscape, and they wanted to sponsor these projects.  It wa
 under a nice top-level business theme, unify recruiting efforts, and take things even further, eventually branching out
 into C++, GPGPUs, and more. 
 -->
-令我惊讶的是，为了应对不断变化的技术环境，开发人员部门正在创建一个新的并行计算组，他们希望赞助这些项目。这是一个机会，在一个漂亮的顶级业务主题下推动一切，统一招聘工作，并进一步采取行动，最终扩展到C ++，GPGPU等。
+令我感到意外的是，为了应对不断变化的技术环境，
+开发部门正在组建一个新的并行计算组，他们希望赞助这些项目。
+这是一个在漂亮的顶层业务主题下推动一切的机会，我们能够统一招聘工作，并采取进一步的行动，达到最终扩展到C++，GPGPU等方面的目的。
 
 <!-- 
 So, obviously, I said yes. 
 -->
-显然，我说是的。
+显然，我可以说我做到了。
 
 <!-- 
 I named the team ["PFX"](https://en.wikipedia.org/wiki/Parallel_Extensions), initially short for "parallel frameworks",
@@ -394,7 +463,13 @@ https://en.wikipedia.org/wiki/Barrier_(computer_science)), [concurrent and lock-
 https://github.com/dotnet/corefx/tree/master/src/System.Collections.Concurrent/src/System/Collections/Concurrent)
 derived from [many great research papers](http://cs.rochester.edu/u/scott/papers/1995_TR600.pdf), and more. 
 -->
-我将团队命名为“PFX”，最初是“并行框架”的缩写，尽管当我们将营销工作发挥给我们时，将其重命名为“Parallel Extensions to .NET”。该团队的初始可交付成果包括PLINQ，任务并行，协调数据结构（CDS）旨在处理高级同步工作，例如屏障式同步，来自许多优秀研究论文的并发和无锁集合等等。
+我将团队命名为[“PFX”](https://en.wikipedia.org/wiki/Parallel_Extensions)，
+最初是“parallel frameworks”的缩写，尽管当我们为了
+发挥营销的优势而将其重命名为“Parallel Extensions to .NET”。
+该团队的初始可交付的成果包括PLINQ，任务并行，
+以及一项新工作——Coordination Data Structures（CDS），
+其旨在处理高级同步工作，例如[屏障同步](https://en.wikipedia.org/wiki/Barrier_(computer_science))，
+由许多优秀研究论文提出的[并发和无锁集合](https://github.com/dotnet/corefx/tree/master/src/System.Collections.Concurrent/src/System/Collections/Concurrent)等。
 
 <!--  
 ### Task Parallel Library
@@ -404,7 +479,7 @@ derived from [many great research papers](http://cs.rochester.edu/u/scott/papers
 <!-- 
 This brings me to task parallelism. 
 -->
-这让我有了任务并行性。
+它（*任务并行库*）给我们带来了任务并行性。
 
 <!-- 
 As part of PLINQ, we needed to create our own concept of parallel "tasks."  And we needed a sophisticated scheduler that
@@ -413,13 +488,21 @@ that they required that a task run on a separate thread, even if doing so was no
 to threads was fairly rudimentary, although [we did make improvements to that over the years](
 http://www.sigmetrics.org/conferences/sigmetrics/2009/workshops/papers_hotmetrics/session2_2.pdf). 
 -->
-作为PLINQ的一部分，我们需要创建自己的并行“任务”概念。我们需要一个复杂的调度程序，可以根据机器的可用资源自动扩展。大多数现有的调度程序都是类似线程池的，因为它们要求在单独的线程上运行任务，即使这样做也没有利润。任务到线程的映射是相当简陋的，尽管多年来我们确实对其进行了改进。
+作为PLINQ的一部分，我们需要创建自己的并行“task”概念。
+为此，我们需要一个复杂的调度程序，
+其可以根据机器的可用资源进行自动扩展。
+大多数现有的调度程序都是采用类似线程池的方式，
+因为它们要求在单独的线程上运行任务，
+即使这样做也没有获取相应的好处。
+并且任务到线程的映射是相当简陋的，
+虽然[多年来我们确实对其进行了改进](http://www.sigmetrics.org/conferences/sigmetrics/2009/workshops/papers_hotmetrics/session2_2.pdf)。
 
 <!-- 
 Given my love of Cilk, and the need to schedule lots of potentially-recursive fine-grained tasks, choosing a
 [work stealing scheduler](https://en.wikipedia.org/wiki/Work_stealing) for our scheduling architecture was a no-brainer. 
 -->
-考虑到我对Cilk的热爱，以及需要安排许多潜在递归的细粒度任务，为我们的调度架构选择工作窃取调度程序是一个明智的选择。
+考虑到我对Cilk的喜爱，以及需要调度大量潜在的递归细粒度任务，
+为我们的调度架构选择[work-stealing调度器](https://en.wikipedia.org/wiki/Work_stealing)不失为一个明智的选择。
 
 <!-- 
 At first, our eyes were locked squarely on PLINQ, and so we didn't pay as much attention to the abstractions.  Then MSR
@@ -428,7 +511,14 @@ so we started building something together.  The `Task<T>` abstraction was born, 
 a suite of [`Parallel` APIs](https://msdn.microsoft.com/en-us/library/system.threading.tasks.parallel(v=vs.110).aspx)
 for common patterns such as fork/join and parallel `for` and `foreach` loops. 
 -->
-起初，我们的眼睛完全锁定在PLINQ上，因此我们没有太多关注抽象。然后，MSR开始探索任务并行库的独立性。这是一个完美的合作机会，所以我们开始一起建立一些东西。 Task <T>抽象诞生了，我们重写了PLINQ以使用它，并为常见模式创建了一套并行API，例如fork / join和parallel for以及foreach循环。
+起初，我们的焦点完全放在了PLINQ，导致对抽象并没有太多的关注。
+而后，MSR开始探索独立的任务并行库的形式。
+这是一个完美的合作机会，因此我们开始一起构建一些东西。
+在这样的条件下，`Task<T>`抽象诞生了，
+为了使用它我们重写了PLINQ，
+并为fork/join以及并行`for`和`foreach`循环等常见模式创建了一套
+[`Parallel`的API](https://msdn.microsoft.com/en-us/library/system.threading.tasks.parallel(v=vs.110).aspx)，
+
 
 <!-- 
 Before shipping, we replaced the guts of the thread-pool with our new shiny work-stealing scheduler, delivering unified
@@ -437,7 +527,10 @@ code is almost identical](
 https://github.com/dotnet/coreclr/blob/1a47d11a6a721a9bed1009d2930de4614b9f6d46/src/mscorlib/src/System/Threading/ThreadPool.cs#L133)
 to my early implementation in support of PLINQ (with many bug fixes and improvements, of course). 
 -->
-在发货之前，我们用新的闪亮的工作窃取调度程序替换了线程池的内容，在一个进程中提供统一的资源管理，这样多个调度程序就不会互相争斗。到目前为止，代码与我早期实现的代码几乎完全相同，以支持PLINQ（当然还有许多错误修复和改进）。
+在发布之前，我们用全新的work-stealing调度器替换了线程池，
+并在进程内部提供了统一的资源管理，使得多个调度程序就不会相互竞争。
+到目前为止，为了支持PLINQ，[我的现在的代码与早期实现几乎完全相同](
+https://github.com/dotnet/coreclr/blob/1a47d11a6a721a9bed1009d2930de4614b9f6d46/src/mscorlib/src/System/Threading/ThreadPool.cs#L133)（当然还有许多错误修复和改进）。
 
 <!-- 
 We really obsessed over the usability of a relatively small number of APIs for a long time.  Although we made mistakes,
@@ -445,7 +538,13 @@ I'm glad in hindsight that we did so.  We had a hunch that `Task<T>` was going t
 parallelism space but none of us predicted the widespread usage for asynchronous programming that really popularized it
 years later.  Now-a-days, this stuff powers `async` and `await` and I can't imagine life without `Task<T>`. 
 -->
-我们真的很关注相对少量的API的可用性很长一段时间。虽然我们犯了错误，但事后我很高兴我们这样做了。我们预感到Task <T>将成为我们在并行空间中所做的一切的核心，但是我们都没有预测异步编程的广泛使用，这些编程在几年后真正普及了它。现在，这些东西支持异步和等待，我无法想象没有Task <T>的生活。
+在很长的一段时间里，我们确实很关注于相对少量API的可用性。
+虽然我们犯了错误，但事后我很高兴我们这样做了。
+我们预感到`Task<T>`将成为我们在并行领域中所做的一切的核心，
+但是我们都没有预测到异步编程的广泛使用，
+这些编程在几年后真正普及了它。
+现在，这些东西已经支持了`async`和`await`，
+我已经无法想象没有`Task<T>`的世界的样子。
 
 <!-- 
 ### A Shout-Out: Inspiration From Java 
@@ -455,7 +554,7 @@ years later.  Now-a-days, this stuff powers `async` and `await` and I can't imag
 <!-- 
 I would be remiss if I didn't mention Java, and the influence it had on my own thinking. 
 -->
-如果我没有提到Java，以及它对我自己思考的影响，那将是我的疏忽。
+如果我没有提及到Java，以及它对我自身思考的影响，那对我来讲是不负责任的。
 
 <!-- 
 Leading up to this, our neighbors in the Java community had also begun to do some innovative work, led by Doug Lea, and
@@ -465,7 +564,12 @@ the incorporation of [JSR 166](https://jcp.org/en/jsr/detail?id=166) into the JD
 formalized as [JSR 133](https://jcp.org/en/jsr/detail?id=133) around this same time, a critical underpinning for the
 lock-free data structures that would be required to scale to large numbers of processors. 
 -->
-在此之前，我们在Java社区的邻居也开始做一些由Doug Lea领导的创新工作，并受到许多相同学术资源的启发。 Doug的1999年着作“Java中的并发编程”帮助将这些想法推广到主流，并最终将JSR 166纳入JDK 5.0。 Java的内存模型也在同一时期被正式化为JSR 133，这是扩展到大量处理器所需的无锁数据结构的关键基础。
+因为在此之前，我们在Java社区的邻居们也开始做一些，
+由Doug Lea领导并受到许多相同学术资源启发的创新工作。 
+Doug在1999年的著作《[Java中的并发编程](http://gee.cs.oswego.edu/dl/cpj/index.html)》
+帮助将这些想法推广成为主流，并最终将JSR-166纳入JDK的5.0版本中。 
+Java的内存模型也在同一时期被正式化为JSR-133，
+并且成为扩展到多处理器所需的无锁数据结构的关键基础。
 
 <!-- 
 This was the first mainstream attempt I saw to raise the abstraction level beyond threads, locks, and events, to
@@ -475,12 +579,17 @@ efforts were a huge influence on us.  I especially admired how academia and indu
 worth of knowledge to the table, and explicitly [sought to emulate](
 http://www.cs.washington.edu/events/colloquia/search/details?id=768) this approach in the years to come. 
 -->
-这是我看到的首次将线程，锁和事件之外的抽象级别提升到更平易近人的主流尝试：并发集合，fork / join等等。它还使该行业更接近学术界一些漂亮的并发编程语言。这些努力对我们产生了巨大影响。我特别钦佩学术界和工业界如何密切合作，将数十年的知识带到谈判桌上，并明确地寻求在未来几年效仿这种方法。
+这是我看到的，首次将线程、锁和事件之外的抽象级别提升到更易使用的主流尝试：
+并发集合，[fork/join](http://gee.cs.oswego.edu/dl/papers/fj.pdf)等等，
+它还使产业界更接近于学术界的一些优秀并发编程语言，
+这些努力对我们产生了巨大影响。
+我特别钦佩于学术界和产业界是如何密切合作的，
+将数十年的研究转化为成果，并在未来几年明确地[努力模仿](http://www.cs.washington.edu/events/colloquia/search/details?id=768)这种方法。
 
 <!-- 
 Needless to say, given the similarities between .NET and Java, and level of competition, we were inspired. 
 -->
-毋庸置疑，鉴于.NET和Java之间的相似性以及竞争程度，我们受到启发。
+总之毋庸置疑的是，鉴于.Net和Java之间的相似性以及相互竞争的程度，我们从Java受到启发。
 
 <!-- 
 ## O Safety, Where Art Thou? 
@@ -491,26 +600,38 @@ Needless to say, given the similarities between .NET and Java, and level of comp
 There was one big problem with all of this.  It was all unsafe.  We had been almost exclusively focused on mechanisms
 for introducing concurrency, but not any of the safeguards that would ensure that using them was safe. 
 -->
-所有这一切都有一个大问题。这一切都不安全。我们几乎专注于引入并发的机制，但没有任何保证使用它们是安全的保护措施。
+所有这一切都有一个大问题，那就是这一切都是不安全的。
+我们几乎全部专注于引入并发机制，
+但没有任何保证安全使用它们的保护措施。
 
 <!-- 
 This was for good reason: it's hard.  Damn hard.  Especially across the many diverse kinds of concurrency available to
 developers.  But thankfully, academia had decades of experience in this area also, although it was arguably even more
 "esoteric" to mainstream developers than the parallelism research.  I began wallowing in it night and day. 
 -->
-这是有充分理由的：这很难。该死的。特别是跨越开发人员可用的各种各样的并发性。但值得庆幸的是，学术界在这一领域也有数十年的经验，尽管对于主流开发者而言，它可能比并行性研究更为“深奥”。我开始昼夜不停地徘徊。
+对此，我们是有充分理由：安全很难，非常非常难，
+特别是对于那些跨越开发人员可用的各种各样的并发性。
+但值得庆幸的是，学术界在这一领域也有数十年的研究经验，
+尽管对于主流开发者而言，它可能比并行性的研究更为“深奥”。
+对此，我也开始昼夜不停地徘徊。
 
 <!-- 
 The turning point for me was another BillG ThinkWeek paper I wrote, *Taming Side Effects*, in 2008.  In it, I described
 a new type system that, little did I know at the time, would form the basis of my work for the next 5 years.  It wasn't
 quite right, and was too tied up in my experiences with STM, but it was a decent start. 
 -->
-对我来说，转折点是我在2008年写的另一篇BillG ThinkWeek论文，驯服副作用。在其中，我描述了一种新型系统，我当时知之甚少，将成为我下一次工作的基础。年份。这不太对，并且在我与STM的经历中过于紧张，但这是一个不错的开始。
+对我来说，转折点出现在我在2008年写的另一篇Bill Gates的
+ThinkWeek文章——*Taming Side Effects（驯服副作用）*。
+在那篇文章中，我描述了一种新型的系统，
+却不知道那将成为我下一个五年所做工作的基础。
+尽管里面有些地方不是很正确，
+并且与我在STM中的经历过分地捆绑在一起，但这却是一个不错的开始。
 
 <!-- 
 Bill again concluded with a "We need to do this."  So I got to work! 
 -->
-比尔再次以“我们需要这样做”结束。所以我开始工作了！
+比尔再次以“我们需要这样做”作为总结，
+因此我开始了这方面的工作！
 
 <!-- 
 # Hello, Midori 
@@ -522,7 +643,9 @@ But there was still a huge problem.  I couldn't possibly imagine doing this work
 existing languages and runtimes.  I wasn't looking for a warm-and-cozy approximation of safety, but rather something
 where, if your program compiled, you could know it was free of data races.  It needed to be bulletproof. 
 -->
-但仍然存在一个巨大的问题。我无法想象在现有语言和运行时的上下文中逐步完成这项工作。我并不是在寻找温暖和舒适的安全近似，而是在某些地方，如果您的程序编译，您可以知道它没有数据竞争。它需要防弹。
+但仍然存在一个巨大的问题。
+我无法想象在现有语言和运行时的上下文中逐步完成这项工作。
+我并不是在寻找温暖和舒适的安全近似，而是在某些地方，如果您的程序编译，您可以知道它没有数据竞争。它需要防弹。
 
 <!-- 
 Well, actually, I tried.  I prototyped a variant of the system using C# custom attributes and static analysis, but

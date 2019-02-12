@@ -16,15 +16,17 @@ competition.  There's no easy cookie-cutter recipe for achieving a good performa
 some best practices you can follow to plant the requisite seeds into your team.  So, let's go! 
 -->
 在本文中，我将谈谈“关于性能的文化”。
-性能是软件工程的关键支柱之一，并且难以做到，有时甚至难以识别。 
-正如一位著名的法官曾经说过的那样，“当我看到它时，我就知道了（I know it when I see it）”。
-我之前已经详细地谈过了性能和文化，
-但两者之间的交互才是使事情变得有趣的地方。 
-能够做到这一点的团队的性能几乎贯穿于团队，
-并且从一开始就如何运作的各个方面，
+性能是软件工程的关键支柱之一，
+并且很难做正确，有时甚至都难以识别。 
+正如一位著名的法官曾经说过的那样，“当我看到它时，我就知道了”（I know it when I see it）。
+我之前已详细地聊到了[性能]((http://joeduffyblog.com/2010/09/06/the-premature-optimization-is-evil-myth/)
+和[文化]((http://joeduffyblog.com/2013/02/17/software-leadership-series/)，
+但两者之间的交互才将事情变得更有趣。 
+能够做好这一点的团队几乎从一开始就
+将性能贯穿于团队运作的各个方面，
 并且能够主动提供可以摧毁竞争对手的良好客户体验。 
-没有千篇一律的简单方法来获得良好的性能文化，
-但是你依然可以遵循一些最佳实践来将必要的种子植入到团队中。 
+虽然没有千篇一律的简单方法来获得良好的性能文化，
+但是你依然可以遵循一些最佳实践来将必要条件的种子植入到团队中。
 因此，让我们一起出发吧！
 
 <!-- 
@@ -44,9 +46,10 @@ attempting to recover it later on.  I've also worked on many teams, some that ha
 done terribly, and many in between.  The one universal truth is that the differentiating factor is always culture. 
 -->
 其中部分原因是由于我的背景。 
-我曾经研究过系统、运行时、编译器……这些都是客户期望运行的够快的软件。 
-在这样的项目中，与其在事后进行弥补相比，
-在开始时就整合目标，指标和团队的流程总是容易得多。 
+我曾经研究过系统、运行时、编译器……
+这些都是客户期望运行得足够快的软件。 
+在这样的项目中，与在事后进行弥补相比，
+从一开始时就整合目标、指标和团队的流程总是容易得多。 
 我也曾参与过很多团队的工作，有些团队在这方面做得很棒，
 有些团队却做得非常糟糕，而很多团队则介于两者之间。
 一个普遍的事实是，造成这之间差异的因素始终是文化。
@@ -64,9 +67,9 @@ succeed.
 这是一个简单的物理问题：
 在给定有限时间以及在大小速度和功能之间进行折衷的情况下，
 不可能在所有方面加快程序的运行。 
-但我坚信，平均而言，团队花费较少的注意力来发展严谨的性能文化。 
+但我坚信，就平均而言，团队普遍花费较少的注意力来发展严谨的性能文化。 
 我已经很多次听说过这样的言论——“性能不是我们的首要任务”，
-而后来却又痛苦地意识到它的重要性，
+而后来却又痛苦地意识到它的重要性。
 没有性能，产品就不会成功。
 
 <!-- 
@@ -75,10 +78,11 @@ scalability, integrating performance-motivated features into C# and the librarie
 more.  It's particularly top of mind for me, as I've been comparing our experiences to my own in [Midori](
 /2015/11/03/blogging-about-midori/) (which heavily inspired this blog post). 
 -->
-剩下的部分原因是，对于DevDiv团队而言，它是我们所有人摆在首位的，
-由于我们专注于.Net的核心性能，ASP.Net的扩展性，
-将性能驱动的功能集成到C#和库中，使Visual Studio变得更快等等。 
-这对我来说尤其重要，因为我一直在将我们的经历与
+剩下的部分原因是，对于DevDiv团队而言，
+由于我们专注于.Net的核心性能、ASP.Net的扩展性以及
+将性能驱动的功能集成到C#和库中，使Visual Studio变得更快等等，
+使得性能是我们所有人摆在首位的指标。
+这对我来说尤其重要，所以我一直在将我们的经历与
 我在[Midori](/2018/10/20/midori/0-blogging-about-midori/)
 中的经历进行比较（本文也因此受到很大启发）。
 
@@ -101,18 +105,18 @@ How can you tell whether your performance culture is on track?  Well, here are s
 * Performance is something one, or a few, individuals are meant to keep an eye on, instead of the whole team.
 * Performance issues in production are common, and require ugly scrambles to address (and/or cannot be reproduced). 
 -->
-* 回答“产品对我的关键性能指标是如何影响的”这个问题很难。
-* 性能经常退化，团队成员要么不知道，要么不关心，要么发现太晚难以行动。
-* 责备是对性能问题（人员，基础设施或两者皆有）的最常见反应之一。
-* 性能测试大幅度摇摆不定，无法确信，并且通常被大多数团队所忽略。
-* 性能是一个或几个人应该关注的事情，而不是整个团队。
-* 产品常常出现性能问题，并且需要难以解决的争用（和/或不能再现）。
+* 回答“产品在我的关键性能指标上发挥如何”这个问题很难；
+* 性能经常退化，团队成员要么不知道，要么不关心，要么发现太晚而难以行动；
+* 责备是对性能问题（人员，基础设施或两者皆有）的最常见反应之一；
+* 性能测试大幅度摇摆不定，无法得到确认，并且通常被大多数团队所忽略；
+* 性能是一个或几个人应该关注的事情，而不是整个团队；
+* 产品常常出现性能问题，并且需要仓促行动才能解决（和/或不能重现问题）。
 
 <!-- 
 These may sound like technical problems.  It may come as a surprise, however, that they are primarily human problems. 
 -->
-这些咋听起来像是技术问题。 
-然而，出乎意料之外的是，它们主要是人的问题。
+这些听起来像是技术问题。 
+但是，出乎意料之外的是，它们主要是人的问题。
 
 <!-- 
 The solution isn't easy, especially once your culture is in the weeds.  It's always easier to not dig a hole in the
@@ -122,20 +126,20 @@ seeking insights, demanding rigor -- while it simultaneously comes from the bott
 understand performance of the code they are writing, ruthlessly taking a zero-tolerance stance on regressions, and
 being ever-self-critical and on the lookout for proactive improvements. 
 -->
-对此的解决方法并不容易，特别是一旦当你的文化处在杂草中时候。
-从一开始就不挖坑始终比之后从坑里爬出来要容易。
-但是当你陷入困境时，首要的原则就是停止挖坑！
-文化的转型必须从最高层就开始
-——管理层需要在性能的提升中发挥积极作用，提出问题，寻找方法，严谨要求
-——同时从底层开始，工程师积极寻求理解他们正在编写的代码的性能，
-对性能退化采取无情的零容忍态度，以及对自我批评和寻求进行主动改进的态度。
+对此的解决方法并不容易，特别是一旦当性能文化处于十分糟糕的时候。
+从一开始就不挖坑始终比之后从坑里爬出来要更容易。
+可是当你陷入困境时，首要的原则就是停止挖坑！
+文化的转型必须同时从最高层开始
+——管理层需要在性能的提升中发挥积极的作用，提出问题，寻找方法，严谨要求
+——以及从下层开始，工程师积极寻求对他们正在编写的代码性能的理解，
+对性能退化采取无情的零容忍态度，以及对自我批判和寻求进行主动改进的积极性。
 
 <!-- 
 This essay will describe some ways to ensure this sort of a culture, in addition to some best practices I've found help
 to increase its effectiveness once you have one in place.  A lot of it may seem obvious, but believe me, it's pretty
 rare to see everything in here working in harmony in practice.  But when it is, wow, what a difference it can make. 
 -->
-本文将介绍一些确保这种文化的方法，
+本文将介绍一些建立这种文化的方法，
 此外还有一些我发现的有助于提高效率的最佳实践。
 很多事情看起来很明显，但请相信我，在实践中很难看到所有一切都协调一致的进行。
 但是，如果一旦这样的文化得以建立，那它将产生巨大的影响力。
@@ -145,22 +149,21 @@ rare to see everything in here working in harmony in practice.  But when it is, 
 such, you'll see the word "management" a lot.  Many of the same principles work in OSS too.  So, if you like, anytime
 you see "management," mentally transform it into "management or the project's committers."* 
 -->
-* 
-对于OSS软件的快速说明。我从商业软件开发的角度写了这篇文章。
-因此，你会看到很多“管理层”这个词。
-不过许多相同的原则也同样适用于OSS。
+*对于OSS软件的简单说明——我是从商业软件开发的角度写下这篇文章，
+因此你会看到很多“管理层”这个词，
+不过这里的许多相同原则也同样适用于OSS。
 因此，如果你愿意，只要你看到“管理层”二字，
-可以在脑海中转化为“管理层或项目的提交者”。
-*
+可以在脑海中转化为“管理层或项目的提交者”。*
+
 <!-- 
 # It Starts, and Ends, with Culture 
 -->
-# 它以文化开始，结束
+# 以文化开始，以文化结束
 
 <!-- 
 The key components of a healthy performance culture are: 
 -->
-健康的表演文化的关键组成部分是：
+健康的性能文化的关键组成部分是：
 
 <!-- 
 1. Performance is part of the daily dialogue and "buzz" within the team.  Everybody plays a role.
@@ -168,32 +171,33 @@ The key components of a healthy performance culture are:
 3. Engineers take a scientific, data-driven, inquisitive approach to performance.  (Measure, measure, measure!)
 4. Robust engineering systems are in place to track goals, past and present performance, and to block regressions. 
 -->
-1. 表演是团队日常对话和“嗡嗡声”的一部分。 每个人都扮演着一个角色。
-2. 管理层必须关心 - 真正的，而不是表面的 - 关于良好的绩效，并了解它需要什么。
-3. 工程师采用科学的，数据驱动的，好奇的方法来表现。 （测量，测量，测量！）
-4. 有足够的工程系统来跟踪目标，过去和现在的表现，以及阻止回归。
+1. 性能是团队日常交流和闲聊的一部分，每个人都扮演着其中一个角色；
+2. 管理层必须（真正地，而不是表面上地）关心于优良的性能，并了解获得它们需要什么；
+3. 工程师采用科学的，数据驱动的，刨根问底的方法来提升性能（测量，测量，还是测量！）；
+4. 有健壮的工程系统来追踪目标以及过去和现在的性能，并阻止其发生退化。
 
 <!-- 
 I'll spend a bit of time talking about each of these roughly in turn. 
 -->
-我会花一点时间粗略地谈论这些中的每一个。
+我会花一点时间大体地谈论它们中的每一个。
 
 <!-- 
 ## Dialogue, Buzz, and Communication 
 -->
-## 对话，嗡嗡声和沟通
+## 对话，闲聊和沟通
 
 <!-- 
 The entire team needs to be on the hook for performance. 
 -->
-整个团队需要保持良好的表现。
+整个团队需要保持对性能的追求。
 
 <!-- 
 In many teams where I've seen this go wrong, a single person is anointed the go-to performance guy or gal.  Now, that's
 fine and can help the team scale, can be useful when someone needs to spearhead an investigation, and having a vocal
 advocate of performance is great, but it *must not* come at the expense of the rest of the team's involvement. 
 -->
-在我看过这个出错的很多球队中，一个人被涂成了最佳表现家伙或加仑。 现在，这很好，可以帮助团队扩展，当有人需要带头进行调查时，并且拥有表现的声音很好，但它不能以团队的其他参与为代价。
+在我见过的把事情搞砸的团队中，
+一个人被涂成了最佳表现家伙或加仑。 现在，这很好，可以帮助团队扩展，当有人需要带头进行调查时，并且拥有表现的声音很好，但它不能以团队的其他参与为代价。
 
 <!-- 
 This can lead to problems similar to those Microsoft use to have with the "test" discipline; engineers learned bad
@@ -235,11 +239,11 @@ everyone gets busy, and it's important to schedule time as a reminder to keep pu
 <!-- 
 ## Management: More Carrots, Fewer Sticks 
 -->
-## 管理：更多的胡萝卜，更少的棍棒
+## 管理层：更多的胡萝卜和更少的大棒
 <!-- 
 In every team with a poor performance culture, it's management's fault.  Period.  End of conversation. 
 -->
-在每个表现不佳的团队中，都是管理层的错。期。谈话结束。
+在每个性能文化不佳的团队中，都是管理层出了问题。期。谈话结束。
 
 <!-- 
 Engineers can and must make a difference, of course, but if the person at the top and everybody in between aren't deeply
@@ -349,7 +353,7 @@ management's radar.  Such reviews should be driven from the lab and manually gen
 <!-- 
 Which brings me to ... 
 -->
-这让我...
+这让我……
 
 <!-- 
 # Process and Infrastructure 
@@ -359,14 +363,18 @@ Which brings me to ...
 <!-- 
 "Process and infrastructure" -- how boring! 
 -->
-“流程和基础设施” - 多么无聊！
+“流程和基础设施”——多么无聊的事情！
 
 <!-- 
 Good infrastructure is a must.  A team lacking the above cultural traits won't even stop to invest in infrastructure;
 they will simply live with what should be an infuriating lack of rigor.  And good process must ensure effective use
 of this infrastructure.  Here is the bare minimum in my book: 
 -->
-良好的基础设施是必须的。 缺乏上述文化特征的团队甚至不会停止投资基础设施; 他们只会生活在一个令人愤怒的缺乏严谨的环境中。 良好的流程必须确保有效使用此基础架构。 这是我书中的最低要求：
+良好的基础设施是必须的。 
+缺乏上述文化特征的团队甚至不会停下来投资基础设施；
+他们只会生活在一个令人愤怒的缺乏严谨的环境中。 
+良好的流程必须确保有效使用此基础架构。
+这下来是我在本书中的最低要求：
 
 <!-- 
 * All commits must pass a set of gated performance tests beforehand.
@@ -378,25 +386,28 @@ of this infrastructure.  Here is the bare minimum in my book:
     - They measure the "right" thing.
     - They can be run in a "reasonable" amount of time. 
 -->
-* 所有提交必须事先通过一组门控性能测试。
-* 任何滑过这个并且回归表现的提交都会毫无疑问地得到回复。 我称之为零容忍规则。
+* 所有的代码提交必须先通过一组门控性能测试。
+* 任何惊险通过测试并且性能退化的提交都将毫无疑问地被撤回。 
+  我称其为零容忍规则。
 * 实验室，飞行和现场环境报告了连续性能遥测。
 * 这意味着性能测试和基础架构具有一些重要特征：
-  - 他们不吵。
-  - 他们测量“正确”的东西。
+  - 它们不会打扰。
+  - 它们测量了“正确”的东西。
   - 它们可以在“合理”的时间内运行。
 
 <!-- 
 I have this saying: "If it's not automated, it's dead to me." 
 -->
-我有这样一句话：“如果它不是自动化的，它对我来说已经死了。”
+我有这么一句话：“如果它不是自动化的，那么对我来说它已经死了。”
 
 <!-- 
 This highlights the importance of good infrastructure and avoids the dreaded "it worked fine on my computer" that
 everybody, I'm sure, has encountered: a test run on some random machine -- under who knows what circumstances -- is
 quoted to declare success on a benchmark... only to find out some time later that the results didn't hold.  Why is this? 
 -->
-这凸显了良好基础设施的重要性，并避免了可怕的“它在我的计算机上工作得很好”，我确信每个人都遇到过：在某个随机机器上运行测试 - 在谁知道什么情况下 - 被引用来宣布成功一个基准......只是在一段时间后发现结果没有成功。为什么是这样？
+这凸显了良好基础设施的重要性，并避免了可怕的“它明明在我的机器上运行的很好”，
+我确保证每个人都遇到过：在某个随机机器上运行测试 - 在谁知道什么情况下 - 被引用来宣布成功一个基准......只是在一段时间后发现结果没有成功。
+那么为什么会遇到这种情况？
 
 <!-- 
 There are countless possibilities.  Perhaps a noisy process interfered, like AntiVirus, search indexing, or the
