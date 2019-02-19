@@ -69,7 +69,7 @@ asynchronous frameworks these days is there was no cheating.  There wasn't a sin
 我们使用的异步模型的核心是一项名为[Promise](https://en.wikipedia.org/wiki/Futures_and_promises)的技术。
 虽然在如今，该想法已是无处不在，
 但是，你很快将会看到，我们所使用Promise的方式将更加有趣。
-受到[E语言系统](https://en.wikipedia.org/wiki/E_(programming_language))的强烈影响，
+受到[E语言系统](http://t.cn/EV8S8gf)的强烈影响，
 使得与流行的异步框架相比，我们最大的不同在于做到了完全的异步——例如，在我们的系统中，没有一个同步的API。
 
 <!-- 
@@ -121,6 +121,7 @@ Eventually we switched over from static to instance methods:
         (Exception e) => { ... a failure occurred ... }
     ); 
 -->
+
     Promise<U> u = p.WhenResolved(
         (T t) => { ... T变得可用时 ... },
         (Exception e) => { ... 产生失败时 ... }
@@ -185,6 +186,7 @@ What if you didn't want to continue the dataflow chain?  No problem.
         ... as above ...
     ).Ignore(); 
 -->
+
     p.WhenResolved(
         ... 如上 ...
     ).Ignore(); 
@@ -225,29 +227,30 @@ Eventually we added a bunch of helper overloads and APIs for common patterns:
 
     // And so on. 
 -->
-    // 只响应成功情况，并自动抛出错误：
-    Promise<U> u = p.WhenResolved((T t) => { ... T变得可用... });
+```
+// 只响应成功情况，并自动抛出错误：
+Promise<U> u = p.WhenResolved((T t) => { ... T变得可用... });
 
-    // 使用类似finally的结构：
-    Promise<U> u = p.WhenResolved(
-        (T t) => { ... T可用 ... },
-        (Exception e) => { ... 产生失败时 ... },
-        () => { ... 无条件执行... }
-    );
+// 使用类似finally的结构：
+Promise<U> u = p.WhenResolved(
+    (T t) => { ... T可用 ... },
+    (Exception e) => { ... 产生失败时 ... },
+    () => { ... 无条件执行... }
+);
 
-    // 执行各种循环：
-    Promise<U> u = Async.For(0, 10, (int i) => { ... 循环体 ... });
-    Promise<U> u = Async.While(() => ... predicate, () => { ... 循环体 ... });
+// 执行各种循环：
+Promise<U> u = Async.For(0, 10, (int i) => { ... 循环体 ... });
+Promise<U> u = Async.While(() => ... predicate, () => { ... 循环体 ... });
 
-    // 等等。
-
+// 等等。
+```
 <!-- 
 This idea is most certainly not even close to new.  [Joule](https://en.wikipedia.org/wiki/Joule_(programming_language))
 and [Alice](https://en.wikipedia.org/wiki/Alice_(programming_language)) even have nice built-in syntax to make the
 otherwise clumsy callback passing shown above more tolerable. 
 -->
 基本上可以确定的是，这并不能算的上是新颖的想法。 
-[Joule语言](https://en.wikipedia.org/wiki/Joule_(programming_language))和[Alice语言](https://en.wikipedia.org/wiki/Alice_(programming_language))甚至都已有了良好的内置语法支持，
+[Joule语言](http://t.cn/EV8ovNL)和[Alice语言](http://t.cn/EV8o4DO)甚至都已有了良好的内置语法支持，
 使上述繁琐笨拙的回调传递方法变得更容易使用。
 
 <!-- 
@@ -403,17 +406,20 @@ went way beyond this, in the name of performance, and added lightweight coroutin
 A caller invoking an `async` method was forced to choose: use `await` and wait for its result, or use `async` and
 launch an asynchronous operation.  All asynchrony in the system was thus explicit: 
 -->
+
 调用`async`方法的调用者必须进行如下的二选一：使用`await`并等待其结果，或使用`async`并启动异步的操作。 
 因此，系统中的所有异步操作都将显式进行：
+
 <!-- 
     int x = await Bar();        // Invoke Bar, but wait for its result.
     Async<int> y = async Bar(); // Invoke Bar asynchronously; I'll wait later.
     int z = await y;            // ...like now.  This waits for Bar to finish. 
 -->
-    int x = await Bar();        // 调用Bar，并在等待其结果返回。
-    Async<int> y = async Bar(); // 异步调用Bar，并在未来某个时刻处理。
-    int z = await y;            // ... 正如即使计算，它将等待Bar操作完成。
-
+```
+int x = await Bar();        // 调用Bar，并在等待其结果返回。
+Async<int> y = async Bar(); // 异步调用Bar，并在未来某个时刻处理。
+int z = await y;            // ... 正如即使计算，它将等待Bar操作完成。
+```
 <!-- 
 This also gave us a very important, but subtle, property that we didn't realize until much later.  Because in Midori the
 only way to "wait" for something was to use the asynchronous model, and there was no hidden blocking, our type system
@@ -630,7 +636,7 @@ architectural characteristic.
 但我要说的是，主要方向是即使是短寿命的，也需避免像瘟疫一样多余的内存分配。 
 在早期有一个贯穿.NET的口头禅：Gen0代回收是免费的。 
 不幸的是，这种理念已经塑造了很多.NET库代码，并且是彻头彻尾的贯穿。
-Gen0的回收导致暂停和脏缓存，并在高度并发的系统中导致[拍频问题](https://en.wikipedia.org/wiki/Beat_(acoustics))。 
+Gen0的回收导致暂停和脏缓存，并在高度并发的系统中导致[拍频问题](http://t.cn/EV8oCxL)。 
 然而，我要指出的是，在Midori规模上进行垃圾收集工作的一个技巧
 恰恰是细粒度的进程模型，因为其中每个进程都有一个独立的堆，可以独立地进行回收。 
 我将有一篇专门介绍我们如何通过垃圾回收器获得良好表现的文章，但这是最重要的架构上的特征。
@@ -694,6 +700,7 @@ eliminating a few sub-optimal aspects of the state machine rewrite model.  Actua
    a switch statement with multiple state variables, plus a heap-allocated display frame, with lots of local variable
    copying, to be a "simple method."  We were competing with OS's written in native code, so this matters a lot. 
 -->
+
 1. 它完全破坏了代码质量，
    阻碍了像内联这样的简单优化。
    因为很少有内联使用者认为，
@@ -701,12 +708,14 @@ eliminating a few sub-optimal aspects of the state machine rewrite model.  Actua
    并加上堆分配的显示框架（display frame），
    再包含大量局部变量的复制的过程，是一个“简单的方法”。
    由于我们与使用原生代码编写的OS进行竞争，因此这一点很重要。
+
 <!-- 
 1. It required changes to the calling convention.  Namely, returns had to be `Async*<T>` objects, much like .NET's
    `Task<T>`.  This was a non-starter.  Even though ours were structs -- eliminating the allocation aspect -- they were
    multi-words, and required that code fetch out the values with state and type testing.  If my async method returns
    an int, I want the generated machine code to be a method that returns an int, goddamnit. 
 -->
+
 2. 它需对调用约定进行修改。
    也就是说，返回的必须是`Async*<T>`对象，就像.NET的`Task<T>`一样。 
    这并非易事，即使我们返回的是结构并消除了分配的问题，而它们返回的是多字且要求代码通过状态和类型测试来获取值。
@@ -839,11 +848,13 @@ Each process could export an asynchronous interface.  It looked something like t
         // Etc...
     }
 -->
+
     async interface ICalculator {
         async int Add(int x, int y);
         async int Multiply(int x, int y);
         // 等等...
     }
+
 <!-- 
 As with most asynchronous RPC systems, from this interface was generated a server stub and client-side proxy.  On the
 server, we would implement the interface: 
@@ -857,6 +868,7 @@ server, we would implement the interface:
         // Etc...
     } 
 -->
+
     class MyCalculator : ICalculator {
         async int Add(int x, int y) { return x + y; }
         async int Multiply(int x, int y) { return x * y; }
@@ -992,16 +1004,17 @@ within the same process heap.  This let you marshal rich objects by-reference.  
     // Check the document by sending messages within
     // my own process; no copies are necessary:
     var results = await checker.Check(doc); 
--->    
-    // 堆中的异步对象：
-    ISpellChecker checker = ...;
+-->
+```    
+// 堆中的异步对象：
+ISpellChecker checker = ...;
 
-    // 堆中的复杂的不可变的Document对象，可能使用了其他的table：
-    immutable Document doc = ...;
+// 堆中的复杂的不可变的Document对象，可能使用了其他的table：
+immutable Document doc = ...;
 
-    // 通过在自身进程中发送消息来对Document进行check，而无需复制：
-    var results = await checker.Check(doc); 
-
+// 通过在自身进程中发送消息来对Document进行check，而无需复制：
+var results = await checker.Check(doc); 
+```
 <!-- 
 As you can guess, all of this was built upon a more fundamental notion of a "channel."  This is similar to what you'll
 see in [Occam](https://en.wikipedia.org/wiki/Occam_(programming_language)), [Go](
@@ -1013,8 +1026,8 @@ https://en.wikipedia.org/wiki/Actor_model), with some key differences around the
 object identity. 
 -->
 你可以猜到，所有这些都建立在一个更为基本的“通道（channel）”概念之上，
-这与你在[Occam](https://en.wikipedia.org/wiki/Occam_(programming_language))，
-[Go](https://en.wikipedia.org/wiki/Go_(programming_language))和相关的CSP语言中看到的相类似。 
+这与你在[Occam](http://t.cn/EV8oHB7)，
+[Go](http://t.cn/RGeyJl7)和相关的CSP语言中看到的相类似。 
 我个人发现消息是如何在系统周围浮动的结构和相关检查比直接编码到通道本身更舒适，
 但你的自身体验可能会有所不同。
 其结果与使用[Actor](https://en.wikipedia.org/wiki/Actor_model)的编程相类似，
