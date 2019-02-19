@@ -240,7 +240,7 @@ were lucky enough to have some of the original designers of those projects on
 the team. 
 -->
 Midori绝不是第一个以对象权能为核心构建操作系统的系统。
-事实上，我们从[KeyKOS](http://www.cis.upenn.edu/~KeyKOS/NanoKernel/NanoKernel.html)及其后继者[EROS](https://en.wikipedia.org/wiki/EROS_(microkernel))和[Coyotos](http://www.coyotos.org/docs/misc/eros-comparison.html)中获得了重要的灵感。 
+事实上，我们从[KeyKOS](http://www.cis.upenn.edu/~KeyKOS/NanoKernel/NanoKernel.html)及其后继者[EROS](http://t.cn/EVRHoZV)和[Coyotos](http://www.coyotos.org/docs/misc/eros-comparison.html)中获得了重要的灵感。 
 这些系统像Midori一样，利用面向对象方式来提供权能，我们很幸运的是能够在团队中拥有这些项目的一些最初设计者。
 
 <!-- Before moving on, a warning's in order: some systems confusingly use the term
@@ -450,8 +450,8 @@ insights in this entire area.  We had the privilege of working closely with one
 of the brightest minds I've ever worked alongside, who happened to have been a
 chief designer of both systems. -->
 我应该指出的是，就像通用权能的想法一样，类似的想法在Midori之前就已经存在。
-虽然我们没有直接使用，但是来自于[Joule语言](https://en.wikipedia.org/wiki/Joule_(programming_language))
-和后来的[E语言](https://en.wikipedia.org/wiki/E_(programming_language))
+虽然我们没有直接使用，但是来自于[Joule语言](http://t.cn/EV8ovNL)
+和后来的[E语言](http://t.cn/EV8S8gf)
 的想法为我们提供了非常强大的构建基础。 
 [Mark Miller在2006年的博士论文](http://www.erights.org/talks/thesis/markm-thesis.pdf)是这整个领域的重要财富。 
 我们有幸与我曾合作过的最聪明的人之一密切合作，而他恰好是这两个系统的首席设计师。

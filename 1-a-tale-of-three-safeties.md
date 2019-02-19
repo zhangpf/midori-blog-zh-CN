@@ -49,7 +49,7 @@ First, let us define the three safeties, in foundational order:
   memory safety violations, type safety violations can lead to exploits,
   particularly when exposing pathways to memory safety holes. 
 -->
-* [类型安全](https://zh.wikipedia.org/wiki/%E5%9E%8B%E5%88%A5%E5%AE%89%E5%85%A8)禁止以与内存分配时类型不一致的类型方式访问该内存。
+* [类型安全](https://en.wikipedia.org/wiki/Type_safety)禁止以与内存分配时类型不一致的类型方式访问该内存。
   当违背类型安全时也会导致多种缺陷，这包括类型混淆，数据类型转换错误和未初始化的变量等。 
   虽然通常不如内存安全严重，但类型安全被破坏也可能导致漏洞，特别是当间接导致内存安全漏洞时。
 
@@ -100,7 +100,7 @@ because there is no backstop to prevent hackers from violating memory safety in
 order to running arbitrary code, for example. 
 -->
 另一方面，基于语言的安全，则是通过类型系统规则和局部检查（与全局相反的）体系来完成，
-通过推导的方式，该体系可确保不发生违反安全性的操作，再加上可选的运行时检查（例如在缺乏更强大的[依赖类型系统](https://zh.wikipedia.org/wiki/%E4%BE%9D%E8%B5%96%E7%B1%BB%E5%9E%8B)时的数组边界检查）。 
+通过推导的方式，该体系可确保不发生违反安全性的操作，再加上可选的运行时检查（例如在缺乏更强大的[依赖类型系统](https://en.wikipedia.org/wiki/Dependent_type)时的数组边界检查）。 
 这种方法的好处是它采取一种通常更有效的方法来阻止安全漏洞，
 因为开发人员不是在软件运行时，而在编写代码时便可发现这些漏洞。 
 但是，如果你采取欺骗的方式使得类型系统允许非法得操作，你就完蛋了，
@@ -152,7 +152,7 @@ level and library code was most certainly 100% safe, like our entire web browser
 -->
 当然，系统中会有*一些*不安全的代码，而每个不安全组件都需要负责“安全封装”它自身的不安全性。 
 这说起来容易做起来难，而且肯定是系统中最难实现的部分。 
-这就是为什么所谓的[可信计算基（TCB）](https://zh.wikipedia.org/wiki/%E5%8F%AF%E4%BF%A1%E8%AE%A1%E7%AE%97%E5%9F%BA)
+这就是为什么所谓的[可信计算基（TCB）](https://en.wikipedia.org/wiki/Trusted_computing_base)
 要始终保持尽可能小的原因。
 因此，不安全代码不应存在于操作系统内核和运行时之上的任何部件中，而应存在于微内核之上的极少部分。 
 没错，Midori的操作系统调度程序和内存管理器皆是用由安全代码编写而成的，
@@ -167,7 +167,7 @@ proof-carrying code and [typed assembly language](
 https://en.wikipedia.org/wiki/Typed_assembly_language) (TAL).  Added runtime
 checks, a la software fault isolation, can also lessen some of this risk. 
 -->
-有趣的是，依靠类型安全的方法中，[编译器](https://en.wikipedia.org/wiki/Bartok_(compiler))将成为TCB的一部分，因为虽然编译器是用安全代码编写的，但它仍需输出指令供处理器直接执行。 
+有趣的是，依靠类型安全的方法中，[编译器](http://t.cn/EVXZ53S)将成为TCB的一部分，因为虽然编译器是用安全代码编写的，但它仍需输出指令供处理器直接执行。 
 但这里产生风险可以通过携带证明的代码和[类型汇编语言（TAL）](https://en.wikipedia.org/wiki/Typed_assembly_language)等技术稍作补救，
 另外，添加运行时检查和软件故障隔离等方法，也可以减少部分风险。
 
@@ -227,8 +227,8 @@ need to cast things all that much.  And anywhere we did, the compiler optimized
 the hell out of the structures.  The net result wasn't much more than what a
 typical C++ program has just to support virtual dispatch (never mind casting). 
 -->
-你可能还会考虑支持类型安全所需的[运行期类型信息（RTTI）](https://zh.wikipedia.org/wiki/%E5%9F%B7%E8%A1%8C%E6%9C%9F%E5%9E%8B%E6%85%8B%E8%A8%8A%E6%81%AF)的开销有多大。 
-好吧，多亏了POD，以及对[可辨识联合](https://zh.wikipedia.org/zh-cn/%E6%A0%87%E7%AD%BE%E8%81%94%E5%90%88)合适的支持，
+你可能还会考虑支持类型安全所需的[运行时类型信息（RTTI）](https://en.wikipedia.org/wiki/Run-time_type_information)的开销有多大。 
+好吧，多亏了POD，以及对[可辨识联合](https://en.wikipedia.org/wiki/Tagged_union)合适的支持，
 使得我们无需进行太多的类型转换。
 而即使在我们进行类型任何地方，编译器都对结构进行了优化，
 因此最终结果并不比只支持虚拟调度（virtual dispatch）的典型C++程序要差（所以不要担心类型转换和它的开销）。
@@ -328,5 +328,5 @@ principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_p
 everywhere, by default, in a big way.  See you next time. 
 -->
 在本系列的下一篇文章中，我们将看到这种基本的安全性是如何提供了在编程模型和类型系统中担任一等公民的[基于权能的安全模型（capability-based security model）](https://en.wikipedia.org/wiki/Capability-based_security)的，
-以及“从构造”上消除[环境权限（ambient authority）](https://en.wikipedia.org/wiki/Ambient_authority)和默认在所有地方启用[最小权限原则](https://zh.wikipedia.org/wiki/%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E5%8E%9F%E5%88%99)。
+以及“从构造”上消除[环境权限（ambient authority）](https://en.wikipedia.org/wiki/Ambient_authority)和默认在所有地方启用[最小权限原则](https://en.wikipedia.org/wiki/Principle_of_least_privilege)。
 我们下次再见！
