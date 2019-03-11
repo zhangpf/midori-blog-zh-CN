@@ -84,7 +84,7 @@ may help to recitify some of this.
 2. [对象即安全权能](/2018/11/18/midori/2-objects-as-secure-capabilities/)
 3. [一切皆异步](/2018/11/25/midori/3-asynchronous-everything/)
 4. [安全的原生代码](/2019/02/17/midori/4-safe-native-code/)
-5. 错误处理模型
+5. [错误处理模型](/2019/03/09/midori/5-the-error-model/)
 6. 关于性能的文化
 7. 关于并发的15年
 

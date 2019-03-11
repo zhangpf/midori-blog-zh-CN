@@ -452,7 +452,7 @@ chief designer of both systems. -->
 我应该指出的是，就像通用权能的想法一样，类似的想法在Midori之前就已经存在。
 虽然我们没有直接使用，但是来自于[Joule语言](http://t.cn/EV8ovNL)
 和后来的[E语言](http://t.cn/EV8S8gf)
-的想法为我们提供了非常强大的构建基础。 
+的想法为我们提供了非常强大的构建基础。
 [Mark Miller在2006年的博士论文](http://www.erights.org/talks/thesis/markm-thesis.pdf)是这整个领域的重要财富。 
 我们有幸与我曾合作过的最聪明的人之一密切合作，而他恰好是这两个系统的首席设计师。
 
